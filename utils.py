@@ -5,13 +5,14 @@ def get_formatted_prompt(generation_details, blockName):
   prompt = Prompt(
     section_type=blockName,
     story_title=generation_details["story_title"],
-    block_title=generation_details[f"{blockName.lower()}_block_title"],
-    audience=generation_details[f"{blockName.lower()}_audience"],
-    persona=generation_details[f"{blockName.lower()}_persona"],
-    word_count=generation_details[f"{blockName.lower()}_word_count"],
-    key_points=generation_details[f"{blockName.lower()}_key_points"],
-    tone_style=generation_details[f"{blockName.lower()}_llm_model"]
+    block_title=generation_details[f"{blockName}_block_title"],
+    audience=generation_details[f"{blockName}_audience"],
+    style=generation_details[f"{blockName}_style"],
+    word_count=generation_details[f"{blockName}_word_count"],
+    sentence_count=generation_details[f"{blockName}_sentence_count"],
+    keywords=generation_details[f"{blockName}_keywords"],
+    tone_style=generation_details[f"{blockName}_tone_style"],
+    role=generation_details[f"{blockName}_role"],
+    tone=generation_details[f"{blockName}_tone"],
   ) 
-  print(prompt)
-  print(prompt.get_formatted_prompt())
   return prompt.get_formatted_prompt()
