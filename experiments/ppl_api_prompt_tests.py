@@ -1,5 +1,9 @@
 import logging
+from prompts import dummy_prompt
+from prompts import prompt_elements
+
 # import warnings
+
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -51,6 +55,7 @@ def ppl_query_api(system_prompt):
     # Access and return the content of the message
     return response.choices[0].message.content
 
+
 system_prompt = """
                 You are an experienced writer tasked with creating a high-quality academic piece. Your goal is to write a well-researched, detailed, and comprehensive chapter for a work discussing the topic: The Impact of Climate Change on Global Agriculture. Follow these instructions carefully to produce an excellent piece of writing:
 
@@ -79,8 +84,18 @@ Remember, you are writing as an experienced environmental scientist. Draw upon t
 Begin writing your chapter now, incorporating all the above guidelines. Do not include any meta-commentary or additional text outside of the actual chapter content.
                 """
 
+logging.info("PRINTING system_prompt")
+
+print(system_prompt)
+
+logging.info("PRINTING dummy_prompt")
+
+print(dummy_prompt)
+
+logging.info("CALLING ppl_query_api()")
+
 ppl_query_api(system_prompt)
 
 logging.info("ENDING ppl_api_prompt_tests.py")
 
-#TODO: Store the system prompt or dummy prompt externally. We need to decide on the method and location for this.
+# TODO: We need to store the system prompt or dummy prompt externally. The method and location for this storage must be decided upon.
