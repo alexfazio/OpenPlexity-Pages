@@ -1,3 +1,5 @@
+![openplexity-pages](https://github.com/user-attachments/assets/4fb6dfa2-fda9-421d-a30d-8026c300a0c1)
+
 # OpenPlexity: Open Source AI-Powered Content Creation
 
 ## Introducing OpenPlexity
