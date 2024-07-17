@@ -1,25 +1,34 @@
-import openai
+from openai import OpenAI
+import os
+import streamlit as st
 
-# Initialize API clients
-openai.api_key = "your-openai-api-key"
 
-def run_prompt(prompt, model):
-    if model in ["GPT-3", "GPT-4"]:
-        return run_openai_prompt(prompt, model)
-    else:
-        return "Unsupported model selected"
+def run_prompt(prompt, OPENAI_API_ENDPOINT, OPENAI_API_KEY):
+    # Initialize API clients
+    # OPENAI_API_ENDPOINT = st.secrets("OPENAI_API_ENDPOINT")
+    # OPENAI_API_KEY  = st.secrets("OPENAI_API_KEY")
 
-def run_openai_prompt(prompt, model):
-    model_name = "gpt-3.5-turbo" if model == "GPT-3" else "gpt-4"
-    response = openai.ChatCompletion.create(
+    messages = [
+      {
+          "role": "system",
+          "content": (
+              "You are an artificial intelligence assistant and you need to "
+              "engage in a helpful, detailed, polite conversation with a user."
+              "Provide citations for every affirmation."
+          ),
+      },
+      {
+          "role": "user",
+          "content": prompt,
+      },
+    ]
+    model_name = ""
+    print("openai api key: ", OPENAI_API_KEY)
+    print("openai api endpoint: ", OPENAI_API_ENDPOINT)
+    client = OpenAI(api_key=OPENAI_API_KEY, base_url=OPENAI_API_ENDPOINT)
+    response = client.chat.completions.create(
         model=model_name,
-        messages=[
-            {"role": "system", "content": "You are a helpful AI assistant."},
-            {"role": "user", "content": prompt}
-        ],
-        max_tokens=1000,
-        n=1,
-        stop=None,
-        temperature=0.7,
+        messages=messages,
     )
-    return response.choices[0].message['content'].strip()
+    print(response.choices[0].message.content)
+    return response.choices[0].message.content

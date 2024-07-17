@@ -1,7 +1,17 @@
 import streamlit as st
 from prompt import Prompt
 import utils
-import ai_api  # We'll create this file next
+import ai_api 
+import os
+
+# Get API_KEY from .env file
+# OPENAI_API_ENDPOINT = os.getenv("OPENAI_API_ENDPOINT")
+# OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+OPENAI_API_ENDPOINT = "http://localhost:5000/v1"
+OPENAI_API_KEY = "na"
+
+
 
 # Set page title and layout
 st.set_page_config(page_title="AI Article Generator", layout="wide")
@@ -10,8 +20,8 @@ st.set_page_config(page_title="AI Article Generator", layout="wide")
 st.title("Openplexity Pages")
 story_blocks = [
     "Introduction",
-    # "Main",
-    # "Conclusion",
+    "Main",
+    "Conclusion",
 ]
 left_column, right_column = st.columns([1, 1])
 
@@ -54,7 +64,7 @@ with right_column:
             
             if st.button(f"Run {block} Prompt"):
                 with st.spinner(f"Generating {block}..."):
-                    response = ai_api.run_prompt(st.session_state[f"{block.lower()}_prompt"], generation_details[f"{block.lower()}_llm_model"])
+                    response = ai_api.run_prompt(st.session_state[f"{block.lower()}_prompt"], OPENAI_API_ENDPOINT, OPENAI_API_KEY)
                 st.session_state[f"{block.lower()}_response"] = response
                 st.success(f"{block} generated successfully!")
             
