@@ -16,6 +16,7 @@ python = ">=3.10,<3.14"
 streamlit = "^1.3.0"
 python-dotenv = "^1.0.1"
 openai = "^1.35.14"
+watchdog = "^4.0.1"
 
 [build-system]
 requires = ["poetry-core"]
