@@ -10,7 +10,7 @@ def ppl_query_api(system_prompt):
     from dotenv import load_dotenv
     import os
 
-    logging.info("STARTING ppl_query_api")
+    logging.info("STARTING ppl_query_api()")
 
     # Load environment variables from .env file
     load_dotenv()
@@ -42,15 +42,14 @@ def ppl_query_api(system_prompt):
         messages=messages,
     )
 
-    logging.info("RESULT ppl_query_api")
+    logging.info("RESULT ppl_query_api()")
 
     print(response.choices[0].message.content)
 
-    logging.info("ENDING ppl_query_api")
+    logging.info("ENDING ppl_query_api()")
 
     # Access and return the content of the message
     return response.choices[0].message.content
-
 
 system_prompt = """
                 You are an experienced writer tasked with creating a high-quality academic piece. Your goal is to write a well-researched, detailed, and comprehensive chapter for a work discussing the topic: The Impact of Climate Change on Global Agriculture. Follow these instructions carefully to produce an excellent piece of writing:
@@ -81,3 +80,5 @@ Begin writing your chapter now, incorporating all the above guidelines. Do not i
                 """
 
 ppl_query_api(system_prompt)
+
+logging.info("ENDING ppl_api_prompt_tests.py")
