@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "openplexity-pages"
 version = "0.0.1"
-description = "A Streamlit project"
+description = "Open-Source Perplexity Pages"
 authors = [
     "Alessandro Fazio <alessandro.fazio@me.com>",
     "Vasile Bobeica <vasile.bobeica@addictive.dev>",
