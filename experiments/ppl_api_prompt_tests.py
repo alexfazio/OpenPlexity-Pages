@@ -82,3 +82,5 @@ Begin writing your chapter now, incorporating all the above guidelines. Do not i
 ppl_query_api(system_prompt)
 
 logging.info("ENDING ppl_api_prompt_tests.py")
+
+#TODO: Store the system prompt or dummy prompt externally. We need to decide on the method and location for this.
