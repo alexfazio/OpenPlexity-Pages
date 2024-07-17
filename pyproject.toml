@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "openplexity-pages"
+version = "0.1.0"
+description = ""
+authors = ["VasileAddictive"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+streamlit = "^1.36.0"
+openai = "^1.35.14"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
