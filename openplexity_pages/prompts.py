@@ -1,21 +1,32 @@
 import logging
 
 # Setup logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
-prompt_elements = {
+global_prompt_elements = {
     "target_audience": "",
     "example_tone": "",
-    "keywords": "",  # Is the keyword feature specific to a story block, or is it a feature of the story as a whole?
-    "story_block_position": "",  # Intro, conclusion, etc.
-    "story_block_sentence_count": "",
-    "story_block_title": "",
-    "story_block_word_count": "",
+    "keywords":
+    "",  # Is the keyword feature specific to a story block, or is it a feature of the story as a whole?
     "story_style": "",
     "story_title": "",
     "story_tone": "",
     "writer_role_persona": ""
 }
+
+story_block = {
+    "story_title": story_title,
+}
+
+# block_prompt_elements = {
+#     "story_block_position": "",  # Intro, conclusion, etc.
+#     "story_block_sentence_count": "",
+#     "story_block_title": "",
+#     "story_block_word_count": "",
+# }
+
+# TODO: separare il dizionario dinamico di Vasile per i prompt, in un dizionario più curato
 
 dummy_prompt = f"""
 {{

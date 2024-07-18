@@ -1,0 +1,7 @@
+modules = ["python-3.12", "python-3.11", "python-3.10"]
+[nix]
+channel = "stable-24_05"
+
+[[ports]]
+localPort = 8501
+externalPort = 80
