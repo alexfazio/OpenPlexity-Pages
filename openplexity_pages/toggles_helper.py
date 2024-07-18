@@ -1,22 +1,13 @@
 # toggles_helper.py
 
-import json
-from pathlib import Path
-
-STATE_FILE = Path(__file__).parent / "toggle_states.json"
+from toggle_states import toggle_states
 
 def load_state():
-    if STATE_FILE.exists():
-        with open(STATE_FILE, "r") as f:
-            return json.load(f)
-    return {
-        "global": {},
-        "blocks": {}
-    }
+    return toggle_states
 
 def save_state(state):
-    with open(STATE_FILE, "w") as f:
-        json.dump(state, f)
+    global toggle_states
+    toggle_states = state
 
 def update_global_toggle_state(key, value):
     state = load_state()
@@ -38,9 +29,9 @@ def get_block_toggle_state(block, key, default=False):
     state = load_state()
     return state["blocks"].get(block, {}).get(key, default)
 
-# Initialize default states if the file doesn't exist
-if not STATE_FILE.exists():
-    default_state = {
+# Initialize default states if not already set
+if not toggle_states:
+    toggle_states = {
         "global": {
             "tgl_style": False,
             "tgl_target_audience": False,
@@ -53,4 +44,3 @@ if not STATE_FILE.exists():
             "Two": {"tgl_keywords": False},
         }
     }
-    save_state(default_state)
