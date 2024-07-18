@@ -1,27 +1,37 @@
+import logging
+
+# Setup logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
 prompt_elements = {
-    "audience": "",
+    "target_audience": "",
     "example_tone": "",
-    "keywords": "",
-    "role": "",
-    "sentence_count": "",
+    "keywords": "",  # Is the keyword feature specific to a story block, or is it a feature of the story as a whole?
+    "story_block_position": "",  # Intro, conclusion, etc.
+    "story_block_sentence_count": "",
     "story_block_title": "",
+    "story_block_word_count": "",
+    "story_style": "",
     "story_title": "",
-    "style": "",
-    "tone": "",
-    "word_count": ""
+    "story_tone": "",
+    "writer_role_persona": ""
 }
 
 dummy_prompt = f"""
-{
-  "Story Title": {prompt_elements['story_title']},
-  "Audience": {prompt_elements['audience']},
-  "Role": {prompt_elements['role']},
-  "Tone": {prompt_elements['tone']},
-  "Example Tone": {prompt_elements['example_tone']},
-  "Story Block Title": {prompt_elements['story_block_title']},
-  "Style": {prompt_elements['style']},
-  "Keywords": {prompt_elements['keywords']},
-  "Word Count": {prompt_elements['word_count']},
-  "Sentence Count": {prompt_elements['sentence_count']}
-}
+{{
+    "Target Audience": "{prompt_elements['target_audience']}",
+    "Example Tone": "{prompt_elements['example_tone']}",
+    "Keywords": "{prompt_elements['keywords']}",
+    "Story Block Position": "{prompt_elements['story_block_position']}",
+    "Story Block Sentence Count": "{prompt_elements['story_block_sentence_count']}",
+    "Story Block Title": "{prompt_elements['story_block_title']}",
+    "Story Block Word Count": "{prompt_elements['story_block_word_count']}",
+    "Story Style": "{prompt_elements['story_style']}",
+    "Story Title": "{prompt_elements['story_title']}",
+    "Story Tone": "{prompt_elements['story_tone']}",
+    "Writer Role Persona": "{prompt_elements['writer_role_persona']}"
+}}
 """
+
+logging.info("PRINTING dummy_prompt from prompts.py")
+print(dummy_prompt)

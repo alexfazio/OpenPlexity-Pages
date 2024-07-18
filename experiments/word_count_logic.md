@@ -16,3 +16,7 @@ The maximum is 70 words.
 The average is N words.
 The minimum is N words.
 The maximum is N words.
+
+188
+97
+124
