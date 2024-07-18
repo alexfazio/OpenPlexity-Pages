@@ -1,9 +1,9 @@
-# toggles_state.py
+# toggles_helper.py
 
 import json
 from pathlib import Path
 
-STATE_FILE = Path("toggle_states.json")
+STATE_FILE = Path(__file__).parent / "toggle_states.json"
 
 def load_state():
     if STATE_FILE.exists():

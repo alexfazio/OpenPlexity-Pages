@@ -1,11 +1,11 @@
 import streamlit as st
-from toggles_state import (
+from toggles_helper import (
     update_global_toggle_state,
     update_block_toggle_state,
     get_global_toggle_state,
     get_block_toggle_state
 )
-from prompts import (
+from prompt_helper import (
     update_global_prompt_element,
     update_block_prompt_element,
     get_global_prompt_element,

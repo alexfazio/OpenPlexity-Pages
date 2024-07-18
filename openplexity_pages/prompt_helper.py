@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-PROMPT_STATE_FILE = Path("prompt_states.json")
+PROMPT_STATE_FILE = Path(__file__).parent / "prompt_states.json"
 
 def load_prompt_state():
     if PROMPT_STATE_FILE.exists():
