@@ -18,13 +18,13 @@ with left_column:
 
     # Global settings
     try:
-        default_title = prompt_helper.get_global_prompt_element("story_title", "The Future of AI")
+        default_title = prompt_helper.get_global_prompt_elem("story_title", "The Future of AI")
     except Exception as e:
         st.error(f"Error loading story title: {str(e)}")
         default_title = "The Future of AI"
     
     story_title = st.text_input("Story Title", default_title)
-    prompt_helper.update_global_prompt_element("story_title", story_title)
+    prompt_helper.update_global_prompt_elem("story_title", story_title)
     
     # Global toggles
     for toggle, label in [("style", "Tone Style"), ("target_audience", "Audience"), ("persona", "Role"), ("exemplars", "Example Tone")]:
@@ -33,44 +33,46 @@ with left_column:
             toggles_helper.update_global_toggle_state(toggle_key, True)
             if toggle == "style":
                 tone_style = st.selectbox("Tone", ["Professional", "Friendly"])
-                prompt_helper.update_global_prompt_element("tone_style", tone_style)
+                prompt_helper.update_global_prompt_elem("tone_style", tone_style)
             elif toggle == "target_audience":
                 audience = st.selectbox("Audience", ["Students", "Tech Enthusiasts", "General Public"])
-                prompt_helper.update_global_prompt_element("audience", audience)
+                prompt_helper.update_global_prompt_elem("audience", audience)
             elif toggle == "persona":
                 role = st.selectbox("Role", ["Shakespeare", "Martin", "Tolkien"])
-                prompt_helper.update_global_prompt_element("role", role)
+                prompt_helper.update_global_prompt_elem("role", role)
             elif toggle == "exemplars":
+                global_elements = load_prompt_state()["global_prompt_elem"]
+                block_elements = load_prompt_state()["blockwise_prompt_elem"].get(block, {})
                 example_tone = st.text_area("Example Tone")
-                prompt_helper.update_global_prompt_element("example_tone", example_tone)
+                prompt_helper.update_global_prompt_elem("example_tone", example_tone)
         else:
             toggles_helper.update_global_toggle_state(toggle_key, False)
             if toggle == "style":
-                prompt_helper.update_global_prompt_element("tone_style", "")
+                prompt_helper.update_global_prompt_elem("tone_style", "")
             elif toggle == "target_audience":
-                prompt_helper.update_global_prompt_element("audience", "")
+                prompt_helper.update_global_prompt_elem("audience", "")
             elif toggle == "persona":
-                prompt_helper.update_global_prompt_element("role", "")
+                prompt_helper.update_global_prompt_elem("role", "")
             elif toggle == "exemplars":
-                prompt_helper.update_global_prompt_element("example_tone", "")
+                prompt_helper.update_global_prompt_elem("example_tone", "")
 
     # Story blocks
     for block in story_blocks:
         with st.expander(f"{block} Block", expanded=True):
-            title = st.text_input(f"{block} Block Title", prompt_helper.get_block_prompt_element(block, "title"), key=f"{block}_title_input")
-            prompt_helper.update_block_prompt_element(block, "title", title)
+            title = st.text_input(f"{block} Block Title", prompt_helper.get_block_prompt_elem(block, "title"), key=f"{block}_title_input")
+            prompt_helper.update_block_prompt_elem(block, "title", title)
             
-            word_count = st.slider("Word Count", 100, 1000, prompt_helper.get_block_prompt_element(block, "word_count", 300), key=f"{block}_word_count_slider")
-            prompt_helper.update_block_prompt_element(block, "word_count", word_count)
+            word_count = st.slider("Word Count", 100, 1000, prompt_helper.get_block_prompt_elem(block, "word_count", 300), key=f"{block}_word_count_slider")
+            prompt_helper.update_block_prompt_elem(block, "word_count", word_count)
             
-            keywords = st.text_input("Keywords", prompt_helper.get_block_prompt_element(block, "keywords"), key=f"{block}_keywords_input")
-            prompt_helper.update_block_prompt_element(block, "keywords", keywords)
+            keywords = st.text_input("Keywords", prompt_helper.get_block_prompt_elem(block, "keywords"), key=f"{block}_keywords_input")
+            prompt_helper.update_block_prompt_elem(block, "keywords", keywords)
             
             if st.checkbox("Toggle Keywords", key=f"{block}_tgl_keywords", value=toggles_helper.get_block_toggle_state(block, "tgl_keywords")):
                 toggles_helper.update_block_toggle_state(block, "tgl_keywords", True)
             else:
                 toggles_helper.update_block_toggle_state(block, "tgl_keywords", False)
-                prompt_helper.update_block_prompt_element(block, "keywords", "")
+                prompt_helper.update_block_prompt_elem(block, "keywords", "")
 
     # Generate button
     if st.button("Generate Article"):
@@ -104,7 +106,7 @@ with right_column:
 
     for block in story_blocks:
         if f"{block}_response" in st.session_state:
-            formatted_article += f"## {prompt_helper.get_block_prompt_element(block, 'title')}\n\n"
+            formatted_article += f"## {prompt_helper.get_block_prompt_elem(block, 'title')}\n\n"
             formatted_article += f"![Alt text](https://placehold.co/600x400)  \n"
             formatted_article += st.session_state[f"{block}_response"] + "\n\n"
 
