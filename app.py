@@ -26,22 +26,48 @@ with left_column:
     generation_details = {
         "story_title": story_title,
     }
+
+    # Article settings
+    generation_details[f"toggle_tone_style"] = st.checkbox("Toggle Tone Style", key="toggle_tone_style")
+    if generation_details[f"toggle_tone_style"]:
+      generation_details[f"tone_style"] = st.selectbox("Tone", ["Professional", "Friendly"], key=f"tone_style")
+    else:
+      generation_details[f"tone_style"] = None
+
+    generation_details[f"toggle_audience"] = st.checkbox("Toggle Audience", key="toggle_audience")
+    if generation_details[f"toggle_audience"]:
+      generation_details[f"audience"] = st.selectbox("Audience", ["Students and Educators", "Tech Enthusiasts", "General Public"], key=f"audience")
+    else:
+      generation_details[f"audience"] = None
+
+    generation_details[f"toggle_role"] = st.checkbox("Toggle Role", key="toggle_role")
+    if generation_details[f"toggle_role"]:
+      generation_details[f"role"] = st.selectbox("Role", ["William Shakespeare", "George R.R. Martin", "Tolkien"], key=f"role")
+    else:
+      generation_details[f"role"] = None
+
+    generation_details[f"toggle_example_tone"] = st.checkbox("Toggle Example Tone", key="toggle_example_tone")
+    if generation_details[f"toggle_example_tone"]:
+      generation_details[f"example_tone"] = st.text_area("Example Tone", key=f"example_tone")
+    else:
+      generation_details[f"example_tone"] = None
+
+    # Test events for toggles: 
+    if generation_details[f"toggle_tone_style"]:
+      print("Tone Style toggled!")
+    else:
+      print("Tone Style not toggled!")
+
     
     for block in story_blocks:
         with st.expander(f"{block} Block", expanded=True):
-            generation_details[f"story_title"] = story_title
             generation_details[f"{block}_block_title"] = st.text_input(f"{block} Block Title", f"{block}", key=f"{block}_title")
-            generation_details[f"{block}_audience"] = st.selectbox("Audience", ["Students and Educators", "Tech Enthusiasts", "General Public"], key=f"{block}_audience")
-            generation_details[f"{block}_style"] = st.selectbox("Style", ["Journalist", "Researcher", "Student"], key=f"{block}_style")
-            generation_details[f"{block}_tone_style"] = st.selectbox("Tone", ["Professional", "Friendly"], key=f"{block}_tone_style")
             generation_details[f"{block}_word_count"] = st.slider("Word Count", min_value=100, max_value=1000, value=300, step=50, key=f"{block}_word_count")
             generation_details[f"{block}_sentence_count"] = generation_details[f"{block}_word_count"] / WORDS_PER_SENTENCE
             generation_details[f"{block}_keywords"] = st.text_input("Keywords", key=f"{block}_keywords")
             st.divider()
-            generation_details[f"{block}_llm_model"] = st.selectbox("LLM Model", ["GPT-3", "GPT-4", "Claude", "Custom Model"], key=f"{block}_llm_model")
+            generation_details[f"{block}_llm_model"] = st.selectbox("LLM Model", ["Mistral", "GPT-3", "GPT-4", "Claude", "Custom Model"], key=f"{block}_llm_model")
             generation_details[f"{block}_temperature"] = st.slider("Temperature", min_value=0.0, max_value=1.0, value=0.7, step=0.1, key=f"{block}_temperature")
-            generation_details[f"{block}_role"] = "user"
-            generation_details[f"{block}_tone"] = generation_details[f"{block}_tone_style"]
     
     # Generate button
     if st.button("Generate Article"):

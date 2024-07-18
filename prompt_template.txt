@@ -1,12 +1,12 @@
 Story Title: {{story_title}}
 Story Block Title: {{block_title}}
-Tone: {{tone}}
-Style: {{style}}
-Role: {{role}}
+Tone: {{tone_style}}
+Style: {{role}}
 Audience: {{audience}}
 Word Count: {{word_count}}
 Sentence Count: {{sentence_count}}
 Keywords: {{keywords}}
+Example tone: {{example_tone}}
 
 You are an experienced writer tasked with creating a high-quality academic piece. Your goal is to write a well-researched, detailed, and comprehensive <{{section_type}}> for a work discussing the topic: <story_title>{{story_title}}</story_title>. Follow these instructions carefully to produce an excellent piece of writing:
 1. Begin by thoroughly researching the topic. Use reputable academic sources, peer-reviewed journals, and authoritative books to gather information. Take detailed notes and organize your findings.
