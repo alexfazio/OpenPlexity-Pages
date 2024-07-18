@@ -11,7 +11,8 @@ st.set_page_config(page_title="AI Article Generator", layout="wide")
 # Main title
 st.title("Openplexity Pages")
 
-left_column, middle_column, right_column = st.columns([1, 1, 1])
+# Adjust the column widths
+left_column, right_column = st.columns([1, 3])
 
 with left_column:
     st.header("Generate New Article")
@@ -78,21 +79,7 @@ with left_column:
         for block in story_blocks:
             with st.spinner(f"Generating {block}..."):
                 prompt = prompt_helper.get_formatted_prompt(block)
-                st.write(f"Debug: Prompt for {block}: {prompt}")  # Debug information
-                response = ppl_api.ppl_query_api(prompt)
-            st.session_state[f"{block}_response"] = response
-            st.success(f"{block} generated successfully!")
-
-with middle_column:
-    st.header("Debug column")
-
-    for block in story_blocks:
-        st.subheader(f"{block} Prompt")
-        prompt = prompt_helper.get_formatted_prompt(block)
-        st.text_area(f"{block} Prompt", prompt, height=300, key=f"{block}_prompt_display", disabled=True)
-        
-        if st.button(f"Run {block} Prompt"):
-            with st.spinner(f"Generating {block}..."):
+                st.text_area(f"Debug: Prompt for {block}", prompt, height=150)  # Debug information
                 response = ppl_api.ppl_query_api(prompt)
             st.session_state[f"{block}_response"] = response
             st.success(f"{block} generated successfully!")
@@ -100,12 +87,44 @@ with middle_column:
 with right_column:
     st.header("Formatted Article")
 
-    formatted_article = ""
+    # Custom CSS for article styling
+    st.markdown("""
+        <style>
+        .article-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .article-content {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .article-content h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .article-content img {
+            max-width: 100%;
+            height: auto;
+            margin: 20px 0;
+        }
+        .article-content p {
+            margin-bottom: 15px;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    formatted_article = "<div class='article-container'><div class='article-content'>"
 
     for block in story_blocks:
         if f"{block}_response" in st.session_state:
-            formatted_article += f"## {prompt_helper.get_block_prompt_elem(block, 'title')}\n\n"
-            formatted_article += f"![Alt text](https://placehold.co/600x400)  \n"
-            formatted_article += st.session_state[f"{block}_response"] + "\n\n"
+            formatted_article += f"<h2>{prompt_helper.get_block_prompt_elem(block, 'title')}</h2>"
+            formatted_article += f"<img src='https://placehold.co/600x400' alt='Placeholder image'>"
+            formatted_article += f"<p>{st.session_state[f'{block}_response']}</p>"
 
-    st.markdown(formatted_article)
+    formatted_article += "</div></div>"
+
+    st.markdown(formatted_article, unsafe_allow_html=True)
