@@ -1,6 +1,4 @@
 import logging
-from prompts import dummy_prompt
-from prompts import prompt_elements
 
 # import warnings
 
@@ -90,7 +88,7 @@ print(system_prompt)
 
 logging.info("PRINTING dummy_prompt")
 
-print(dummy_prompt)
+# print(dummy_prompt)
 
 logging.info("CALLING ppl_query_api()")
 
