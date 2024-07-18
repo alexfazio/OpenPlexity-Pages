@@ -41,9 +41,7 @@ with left_column:
                 role = st.selectbox("Role", ["Shakespeare", "Martin", "Tolkien"])
                 prompt_helper.update_global_prompt_elem("role", role)
             elif toggle == "exemplars":
-                global_elements = load_prompt_state()["global_prompt_elem"]
-                block_elements = load_prompt_state()["blockwise_prompt_elem"].get(block, {})
-                example_tone = st.text_area("Example Tone")
+                example_tone = st.text_area("Example Tone", prompt_helper.get_global_prompt_elem("example_tone"))
                 prompt_helper.update_global_prompt_elem("example_tone", example_tone)
         else:
             toggles_helper.update_global_toggle_state(toggle_key, False)

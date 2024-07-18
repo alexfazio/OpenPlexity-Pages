@@ -1,46 +1,36 @@
 from prompt_states import prompt_states
 
+# State Management Functions
 
-# Retrieves the current state of prompt_states
 def load_general_prompt_state():
     return prompt_states
 
-
-# Updates the global prompt_states variable with a new state
-def save_general_prompt_state(state):
+def save_general_prompt_state(state): 
     global prompt_states
     prompt_states = state
 
+# Setter Functions
 
-# Updates a specific key-value pair in the global section of prompt_states
 def update_global_prompt_elem(key, value):
     if "global_prompt_elem" not in prompt_states:
         prompt_states["global_prompt_elem"] = {}
     prompt_states["global_prompt_elem"][key] = value
 
-
-# Updates a specific key-value pair for a given block in the blocks section of prompt_states
-# If the block doesn't exist, it creates it
 def update_block_prompt_elem(block, key, value):
     if block not in prompt_states["blockwise_prompt_elem"]:
         prompt_states["blockwise_prompt_elem"][block] = {}
     prompt_states["blockwise_prompt_elem"][block][key] = value
 
+# Getter Functions
 
-# Retrieves a value from the global section of prompt_states for a given key
-# Returns a default value if the key is not found
 def get_global_prompt_elem(key, default=""):
     return prompt_states["global_prompt_elem"].get(key, default)
 
-
-# Retrieves a value from a specific block in the blocks section of prompt_states for a given key
-# Returns a default value if the block or key is not found
 def get_block_prompt_elem(block, key, default=""):
     return prompt_states["blockwise_prompt_elem"].get(block, {}).get(key, default)
 
+# Prompt Generation Function
 
-# Generates a formatted prompt string for a given block
-# Incorporates various elements from both global and block-specific settings
 def get_formatted_prompt(block):
     global_elements = load_general_prompt_state()["global_prompt_elem"]
     block_elements = load_general_prompt_state()["blockwise_prompt_elem"].get(block, {})
@@ -64,9 +54,7 @@ def get_formatted_prompt(block):
 
     return prompt
 
-
-# Initialize default states if not already set
-# This ensures that there's always a basic structure in place for the prompts
+# Initialization
 if not prompt_states:
     prompt_states.update({
         "global_prompt_elem": {
