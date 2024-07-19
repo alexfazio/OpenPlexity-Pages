@@ -45,7 +45,7 @@ with settings_column:
     
     with settings_tab:
         # Global toggles
-        for toggle, label in [("style", "Tone Style"), ("target_audience", "Audience"), ("persona", "Role"), ("exemplars", "Example Tone")]:
+        for toggle, label in [("style", "Tone Style"), ("target_audience", "Audience"), ("persona", "Role"), ("exemplars", "Examples")]:
             toggle_key = f"tgl_{toggle}"
             if st.checkbox(f"Toggle {label}", key=f"toggle_{toggle}", value=toggles_helper.get_global_toggle_state(toggle_key)):
                 toggles_helper.update_global_toggle_state(toggle_key, True)  # User toggle input sent
@@ -59,8 +59,8 @@ with settings_column:
                     role = st.selectbox("Role", ["Shakespeare", "Martin", "Tolkien"])
                     prompt_helper.update_global_prompt_elem("role", role)  # User input sent
                 elif toggle == "exemplars":
-                    example_tone = st.text_area("Example Tone", prompt_helper.get_global_prompt_elem("example_tone"))
-                    prompt_helper.update_global_prompt_elem("example_tone", example_tone)  # User input sent
+                    exemplars = st.text_area("Examples", prompt_helper.get_global_prompt_elem("exemplars"))
+                    prompt_helper.update_global_prompt_elem("exemplars", exemplars)  # User input sent
             else:
                 toggles_helper.update_global_toggle_state(toggle_key, False)  # User toggle input sent
                 if toggle == "style":
@@ -70,7 +70,7 @@ with settings_column:
                 elif toggle == "persona":
                     prompt_helper.update_global_prompt_elem("role", "")
                 elif toggle == "exemplars":
-                    prompt_helper.update_global_prompt_elem("example_tone", "")
+                    prompt_helper.update_global_prompt_elem("exemplars", "")
 
     with api_settings_tab:
         st.subheader("API Settings")

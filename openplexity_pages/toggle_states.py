@@ -1,16 +1,20 @@
-toggle_states = {
-    "global_tgl_elem": {
-        "tgl_style": True,
-        "tgl_target_audience": True,
-        "tgl_persona": False,
-        "tgl_exemplars": False
-    },
-    "blockwise_tgl_elem": {
-        "Zero": {"tgl_keywords": False},
-        "One": {"tgl_keywords": False},
-        "Two": {"tgl_keywords": False},
-        "Introduction": {"tgl_keywords": False},
-        "Main": {"tgl_keywords": False},
-        "Conclusion": {"tgl_keywords": False}
-    }
+# This file now only defines the structure of the toggle states
+toggle_states_structure = {
+    "global_tgl_elem": [
+        "tgl_style",
+        "tgl_target_audience",
+        "tgl_persona",
+        "tgl_exemplars"
+    ],
+    "blockwise_tgl_elem": [
+        "Zero",
+        "One",
+        "Two",
+        "Introduction",
+        "Main",
+        "Conclusion"
+    ],
+    "blockwise_toggles": [
+        "tgl_keywords"
+    ]
 }
