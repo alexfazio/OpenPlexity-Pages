@@ -3,7 +3,9 @@ import toggles_helper
 import prompt_helper
 import ppl_api
 import time
-import random  # Add this import for the placeholder function
+import random
+from rentry import export_to_rentry  # Add this import
+import webbrowser  # Add this import
 
 # Define story blocks
 story_blocks = ["Introduction", "Main", "Conclusion"]
@@ -201,6 +203,9 @@ def search_image(query):
 
 # Content column
 with content_column:
+    # Add a div with class 'content-column' to target the CSS
+    st.markdown('<div class="content-column">', unsafe_allow_html=True)
+    
     # Move story title input and header to the top of the content column
     try:
         default_title = prompt_helper.get_global_prompt_elem("story_title", "The Future of AI")
@@ -221,17 +226,17 @@ with content_column:
 
     # Story blocks
     for block in story_blocks:
-        st.subheader(f"{block} Block")
-        
+        # Use st.tabs() without any additional parameters
         output_tab, settings_tab, image_tab = st.tabs(["Output", "Settings", "Image"])
         
         with output_tab:
-            # Move block title and generate button to output tab
             # User text input for block title
-            title = st.text_input(f"Block Title", prompt_helper.get_block_prompt_elem(block, "title"), key=f"{block}_title_input")
-            prompt_helper.update_block_prompt_elem(block, "title", title)  # User input sent
+            title = st.text_input(f"{block} Title", prompt_helper.get_block_prompt_elem(block, "title"), key=f"{block}_title_input")
             
-            if st.button(f"Generate {block}", key=f"generate_{block}"):
+            # Check if the user has pressed Enter (i.e., the title has changed)
+            if title != prompt_helper.get_block_prompt_elem(block, "title"):
+                prompt_helper.update_block_prompt_elem(block, "title", title)  # User input sent
+                
                 prompt = prompt_helper.get_formatted_prompt(block)
                 
                 # Simulate streaming output
@@ -250,7 +255,7 @@ with content_column:
                 st.session_state[f"{block}_response"] = full_response
                 st.success(f"{block} generated successfully!")
             
-            # Display the generated content only if it hasn't been displayed during generation
+            # Display the generated content if it exists
             elif f"{block}_response" in st.session_state:
                 st.markdown(f"""
                 <div class="block-content">
@@ -287,6 +292,9 @@ with content_column:
             elif f"{block}_image_url" in st.session_state:
                 st.image(st.session_state[f"{block}_image_url"], caption=f"Image for {block}", use_column_width=True)
 
+    # Close the content-column div
+    st.markdown('</div>', unsafe_allow_html=True)
+
 # New outline_column
 with outline_column:
     st.header("Overview")
@@ -305,13 +313,40 @@ with outline_column:
     with preview_tab:
         if st.button("Preview"):
             st.markdown("### Article Preview")
+            full_content = f"# {story_title}\n\n"
             for block in story_blocks:
                 if f"{block}_response" in st.session_state:
-                    st.markdown(f"#### {prompt_helper.get_block_prompt_elem(block, 'title')}")
+                    block_title = prompt_helper.get_block_prompt_elem(block, 'title')
+                    full_content += f"## {block_title}\n\n"
+                    full_content += f"{st.session_state[f'{block}_response']}\n\n"
+                    st.markdown(f"#### {block_title}")
                     st.markdown(st.session_state[f"{block}_response"])
                 else:
                     st.warning(f"{block} not generated yet.")
-        
-        if st.button("Export"):
-            # Implement export functionality here
-            st.success("Export functionality not implemented yet.")
+            
+            st.session_state['full_content'] = full_content
+
+        if st.button("Export to Rentry"):
+            # Generate full content here, regardless of whether preview was clicked
+            full_content = f"# {story_title}\n\n"
+            for block in story_blocks:
+                if f"{block}_response" in st.session_state:
+                    block_title = prompt_helper.get_block_prompt_elem(block, 'title')
+                    full_content += f"## {block_title}\n\n"
+                    full_content += f"{st.session_state[f'{block}_response']}\n\n"
+                else:
+                    st.warning(f"{block} not generated yet.")
+                    full_content += f"## {block}\n\n*Content not generated*\n\n"
+
+            rentry_url, edit_code = export_to_rentry(full_content)
+            if rentry_url:
+                st.success(f"Successfully exported to Rentry. URL: {rentry_url}")
+                st.info(f"Edit code: {edit_code}")
+                
+                # Open the Rentry URL in a new browser tab
+                webbrowser.open_new_tab(rentry_url)
+                
+                # Provide a manual link in case automatic opening fails
+                st.markdown(f"If the page doesn't open automatically, [click here to view your Rentry]({rentry_url})")
+            else:
+                st.error("Failed to export to Rentry. Please try again.")
