@@ -1,4 +1,4 @@
-# This file now only defines the structure of the toggle states
+# Define the structure
 toggle_states_structure = {
     "global_tgl_elem": [
         "tgl_style",
@@ -15,6 +15,16 @@ toggle_states_structure = {
         "Conclusion"
     ],
     "blockwise_toggles": [
-        "tgl_keywords"
+        "tgl_keywords",
+        "tgl_notes"
     ]
+}
+
+# Initialize the actual toggle states
+toggle_states = {
+    "global_tgl_elem": {toggle: False for toggle in toggle_states_structure["global_tgl_elem"]},
+    "blockwise_tgl_elem": {
+        block: {toggle: False for toggle in toggle_states_structure["blockwise_toggles"]}
+        for block in toggle_states_structure["blockwise_tgl_elem"]
+    }
 }

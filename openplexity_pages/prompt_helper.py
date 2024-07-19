@@ -10,9 +10,9 @@ DEFAULT_GLOBAL_PROMPT_ELEM = {
 }
 
 DEFAULT_BLOCKWISE_PROMPT_ELEM = {
-    "Introduction": {"title": "Introduction", "word_count": 60, "keywords": ""},
-    "Main": {"title": "Main", "word_count": 60, "keywords": ""},
-    "Conclusion": {"title": "Conclusion", "word_count": 60, "keywords": ""}
+    "Introduction": {"title": "Introduction", "word_count": 60, "keywords": "", "notes": ""},
+    "Main": {"title": "Main", "word_count": 60, "keywords": "", "notes": ""},
+    "Conclusion": {"title": "Conclusion", "word_count": 60, "keywords": "", "notes": ""}
 }
 
 # State Management Functions
@@ -85,6 +85,9 @@ def get_formatted_prompt(block):
 
     if block_elements.get("keywords"):
         prompt += f"Include these keywords: {block_elements['keywords']}. "
+
+    if block_elements.get("notes"):
+        prompt += f"Consider these additional notes: {block_elements['notes']}. "
 
     return prompt
 

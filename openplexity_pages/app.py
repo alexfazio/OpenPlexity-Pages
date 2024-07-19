@@ -6,6 +6,7 @@ import time
 import random
 from rentry import export_to_rentry  # Add this import
 import webbrowser  # Add this import
+from toggle_states import toggle_states_structure  # Import the toggle states structure
 
 # Define story blocks
 story_blocks = ["Introduction", "Main", "Conclusion"]
@@ -54,9 +55,9 @@ if 'toggles_initialized' not in st.session_state:
     st.session_state.toggles_initialized = True
 
 def toggle_callback(toggle):
-    st.session_state[f"tgl_{toggle}"] = not st.session_state.get(f"tgl_{toggle}", False)
-    value = st.session_state[f"tgl_{toggle}"]
-    toggles_helper.update_global_toggle_state(f"tgl_{toggle}", value)
+    st.session_state[toggle] = not st.session_state.get(toggle, False)
+    value = st.session_state[toggle]
+    toggles_helper.update_global_toggle_state(toggle, value)
     if not value:
         prompt_helper.update_global_prompt_elem(toggle, "")
 
@@ -67,21 +68,24 @@ with settings_column:
     
     with settings_tab:
         # Global toggles
-        for toggle, label in [("style", "Tone Style"), ("target_audience", "Audience"), ("persona", "Role"), ("exemplars", "Examples")]:
+        for toggle in toggle_states_structure["global_tgl_elem"]:
             if toggle not in st.session_state:
-                st.session_state[f"tgl_{toggle}"] = toggles_helper.get_global_toggle_state(f"tgl_{toggle}")
+                st.session_state[toggle] = toggles_helper.get_global_toggle_state(toggle)
             
-            if st.checkbox(f"Toggle {label}", key=f"toggle_{toggle}", value=st.session_state[f"tgl_{toggle}"], on_change=toggle_callback, args=(toggle,)):
-                if toggle == "style":
+            # Convert toggle name to a more readable format
+            label = " ".join(toggle.split("_")[1:]).title()
+            
+            if st.checkbox(f"Toggle {label}", key=f"toggle_{toggle}", value=st.session_state[toggle], on_change=toggle_callback, args=(toggle,)):
+                if toggle == "tgl_style":
                     tone_style = st.selectbox("Tone", ["Professional", "Friendly"])
                     prompt_helper.update_global_prompt_elem("tone_style", tone_style)
-                elif toggle == "target_audience":
+                elif toggle == "tgl_target_audience":
                     audience = st.selectbox("Audience", ["Students", "Tech Enthusiasts", "General Public"])
                     prompt_helper.update_global_prompt_elem("audience", audience)
-                elif toggle == "persona":
+                elif toggle == "tgl_persona":
                     role = st.selectbox("Role", ["Shakespeare", "Martin", "Tolkien"])
                     prompt_helper.update_global_prompt_elem("role", role)
-                elif toggle == "exemplars":
+                elif toggle == "tgl_exemplars":
                     exemplars = st.text_area("Examples", prompt_helper.get_global_prompt_elem("exemplars"))
                     prompt_helper.update_global_prompt_elem("exemplars", exemplars)
 
@@ -206,24 +210,36 @@ with content_column:
     # Add a div with class 'content-column' to target the CSS
     st.markdown('<div class="content-column">', unsafe_allow_html=True)
     
-    # Move story title input and header to the top of the content column
+    # Add custom CSS for centering the title
+    st.markdown("""
+        <style>
+        .centered-title {
+            text-align: center;
+            padding: 10px 0;
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+    
     try:
         default_title = prompt_helper.get_global_prompt_elem("story_title", "The Future of AI")
     except Exception as e:
         st.error(f"Error loading story title: {str(e)}")
         default_title = "The Future of AI"
     
-    # Display the header first
-    st.header(default_title)
+    # Create a placeholder for the centered header
+    header_placeholder = st.empty()
     
-    # Then display the text input
-    story_title = st.text_input("Story Title", default_title)
-    prompt_helper.update_global_prompt_elem("story_title", story_title)  # User input sent
-
-    # Update the header if the story title changes
+    # Display the text input
+    story_title = st.text_input("Story Title", default_title, key="story_title_input")
+    
+    # Check if the user has pressed Enter (i.e., the title has changed)
     if story_title != default_title:
-        st.header(story_title)
-
+        prompt_helper.update_global_prompt_elem("story_title", story_title)  # User input sent
+        # Display the centered header with the new title
+        header_placeholder.markdown(f'<div class="centered-title">{story_title}</div>', unsafe_allow_html=True)
+    
     # Story blocks
     for block in story_blocks:
         # Use st.tabs() without any additional parameters
@@ -278,6 +294,16 @@ with content_column:
             else:
                 toggles_helper.update_block_toggle_state(block, "tgl_keywords", False)
                 prompt_helper.update_block_prompt_elem(block, "keywords", "")
+
+            # New: User toggle for custom notes
+            if st.checkbox("Toggle Custom Notes", key=f"{block}_tgl_notes", value=toggles_helper.get_block_toggle_state(block, "tgl_notes")):
+                toggles_helper.update_block_toggle_state(block, "tgl_notes", True)
+                # User input for custom notes (only shown when toggle is activated)
+                notes = st.text_area("Custom Notes", prompt_helper.get_block_prompt_elem(block, "notes"), key=f"{block}_notes_input", height=150)
+                prompt_helper.update_block_prompt_elem(block, "notes", notes)  # User input sent
+            else:
+                toggles_helper.update_block_toggle_state(block, "tgl_notes", False)
+                prompt_helper.update_block_prompt_elem(block, "notes", "")
 
             # Debug information
             st.text_area(f"Debug: Prompt for {block}", prompt_helper.get_formatted_prompt(block), height=150)
