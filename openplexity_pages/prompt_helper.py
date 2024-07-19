@@ -1,13 +1,16 @@
 from prompt_states import prompt_states
 
+
 # State Management Functions
 
 def load_general_prompt_state():
     return prompt_states
 
-def save_general_prompt_state(state): 
-    global prompt_states
-    prompt_states = state
+
+def save_general_prompt_state(state):
+    prompt_states.clear()
+    prompt_states.update(state)
+
 
 # Setter Functions
 
@@ -16,18 +19,22 @@ def update_global_prompt_elem(key, value):
         prompt_states["global_prompt_elem"] = {}
     prompt_states["global_prompt_elem"][key] = value
 
+
 def update_block_prompt_elem(block, key, value):
     if block not in prompt_states["blockwise_prompt_elem"]:
         prompt_states["blockwise_prompt_elem"][block] = {}
     prompt_states["blockwise_prompt_elem"][block][key] = value
+
 
 # Getter Functions
 
 def get_global_prompt_elem(key, default=""):
     return prompt_states["global_prompt_elem"].get(key, default)
 
+
 def get_block_prompt_elem(block, key, default=""):
     return prompt_states["blockwise_prompt_elem"].get(block, {}).get(key, default)
+
 
 # Prompt Generation Function
 
@@ -35,7 +42,7 @@ def get_formatted_prompt(block):
     global_elements = load_general_prompt_state()["global_prompt_elem"]
     block_elements = load_general_prompt_state()["blockwise_prompt_elem"].get(block, {})
 
-    prompt = f"Write a {block_elements.get('word_count', '300')} word article section titled '{block_elements.get('title', block)}'. "
+    prompt = f"Write a {block_elements.get('word_count', '60')} word article section titled '{block_elements.get('title', block)}'. "
 
     if global_elements.get("tone_style"):
         prompt += f"Use a {global_elements['tone_style']} tone. "
@@ -54,6 +61,7 @@ def get_formatted_prompt(block):
 
     return prompt
 
+
 # Initialization
 if not prompt_states:
     prompt_states.update({
@@ -65,8 +73,8 @@ if not prompt_states:
             "example_tone": "",
         },
         "blockwise_prompt_elem": {
-            "Introduction": {"title": "Introduction", "word_count": 300, "keywords": ""},
-            "Main": {"title": "Main", "word_count": 500, "keywords": ""},
-            "Conclusion": {"title": "Conclusion", "word_count": 200, "keywords": ""},
+            "Introduction": {"title": "Introduction", "word_count": 60, "keywords": ""},
+            "Main": {"title": "Main", "word_count": 60, "keywords": ""},
+            "Conclusion": {"title": "Conclusion", "word_count": 60, "keywords": ""},
         }
     })
