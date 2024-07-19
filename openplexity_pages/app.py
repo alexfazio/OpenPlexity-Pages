@@ -29,58 +29,91 @@ st.markdown("""
         color: #333;
         line-height: 1.6;
     }
+    .centered-image {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 66.67%;  /* Matches the width of the center column */
+        height: auto;
+        padding: 20px 0;
+    }
     </style>
 """, unsafe_allow_html=True)
 
-# Main title
-st.title("Openplexity Pages")
+# Place the image at the top of the page
+st.markdown('<img src="https://i.imgur.com/foi8itb.png" alt="Openplexity Pages" class="centered-image">', unsafe_allow_html=True)
 
 # Create three columns: Settings, Content, and Outline/Preview
 settings_column, content_column, outline_column = st.columns([1, 2, 1])
 
+# Add this at the beginning of the script, after the imports
+if 'toggles_initialized' not in st.session_state:
+    toggles_helper.reset_all_toggles()
+    st.session_state.toggles_initialized = True
+
+def toggle_callback(toggle):
+    st.session_state[f"tgl_{toggle}"] = not st.session_state.get(f"tgl_{toggle}", False)
+    value = st.session_state[f"tgl_{toggle}"]
+    toggles_helper.update_global_toggle_state(f"tgl_{toggle}", value)
+    if not value:
+        prompt_helper.update_global_prompt_elem(toggle, "")
+
 with settings_column:
     st.header("Article Settings")
     
-    settings_tab, api_settings_tab, placeholder_tab = st.tabs(["Settings", "API Settings", ""])
+    settings_tab, ai_api_settings_tab, placeholder_tab = st.tabs(["Settings", "AI API Settings", ""])
     
     with settings_tab:
         # Global toggles
         for toggle, label in [("style", "Tone Style"), ("target_audience", "Audience"), ("persona", "Role"), ("exemplars", "Examples")]:
-            toggle_key = f"tgl_{toggle}"
-            if st.checkbox(f"Toggle {label}", key=f"toggle_{toggle}", value=toggles_helper.get_global_toggle_state(toggle_key)):
-                toggles_helper.update_global_toggle_state(toggle_key, True)  # User toggle input sent
+            if toggle not in st.session_state:
+                st.session_state[f"tgl_{toggle}"] = toggles_helper.get_global_toggle_state(f"tgl_{toggle}")
+            
+            if st.checkbox(f"Toggle {label}", key=f"toggle_{toggle}", value=st.session_state[f"tgl_{toggle}"], on_change=toggle_callback, args=(toggle,)):
                 if toggle == "style":
                     tone_style = st.selectbox("Tone", ["Professional", "Friendly"])
-                    prompt_helper.update_global_prompt_elem("tone_style", tone_style)  # User input sent
+                    prompt_helper.update_global_prompt_elem("tone_style", tone_style)
                 elif toggle == "target_audience":
                     audience = st.selectbox("Audience", ["Students", "Tech Enthusiasts", "General Public"])
-                    prompt_helper.update_global_prompt_elem("audience", audience)  # User input sent
+                    prompt_helper.update_global_prompt_elem("audience", audience)
                 elif toggle == "persona":
                     role = st.selectbox("Role", ["Shakespeare", "Martin", "Tolkien"])
-                    prompt_helper.update_global_prompt_elem("role", role)  # User input sent
+                    prompt_helper.update_global_prompt_elem("role", role)
                 elif toggle == "exemplars":
                     exemplars = st.text_area("Examples", prompt_helper.get_global_prompt_elem("exemplars"))
-                    prompt_helper.update_global_prompt_elem("exemplars", exemplars)  # User input sent
-            else:
-                toggles_helper.update_global_toggle_state(toggle_key, False)  # User toggle input sent
-                if toggle == "style":
-                    prompt_helper.update_global_prompt_elem("tone_style", "")
-                elif toggle == "target_audience":
-                    prompt_helper.update_global_prompt_elem("audience", "")
-                elif toggle == "persona":
-                    prompt_helper.update_global_prompt_elem("role", "")
-                elif toggle == "exemplars":
-                    prompt_helper.update_global_prompt_elem("exemplars", "")
+                    prompt_helper.update_global_prompt_elem("exemplars", exemplars)
 
-    with api_settings_tab:
-        st.subheader("API Settings")
+    with ai_api_settings_tab:
+        st.subheader("AI API Settings")
         
-        # Model provider dropdown
-        model_provider = st.selectbox(
-            "Model Provider",
+        # API provider dropdown
+        api_provider = st.selectbox(
+            "API Provider",
             ["OpenAI", "Anthropic", "Google", "Other"],
-            key="model_provider"
+            key="api_provider"
         )
+        
+        # Model selection dropdown
+        if api_provider == "OpenAI":
+            model = st.selectbox(
+                "Model",
+                ["gpt-3.5-turbo", "gpt-4", "text-davinci-003"],
+                key="openai_model"
+            )
+        elif api_provider == "Anthropic":
+            model = st.selectbox(
+                "Model",
+                ["claude-v1", "claude-instant-v1"],
+                key="anthropic_model"
+            )
+        elif api_provider == "Google":
+            model = st.selectbox(
+                "Model",
+                ["palm-2", "text-bison-001"],
+                key="google_model"
+            )
+        else:
+            model = st.text_input("Model", key="other_model")
         
         # API key input
         api_key = st.text_input(
@@ -91,13 +124,71 @@ with settings_column:
         
         # Model temperature slider
         temperature = st.slider(
-            "Model Temperature",
+            "Temperature",
             min_value=0.0,
-            max_value=1.0,
+            max_value=2.0,
             value=0.7,
             step=0.1,
             key="model_temperature"
         )
+
+
+        # Top K slider
+        top_k = st.slider(
+            "Top K",
+            min_value=1,
+            max_value=100,
+            value=50,
+            step=1,
+            key="top_k"
+        )
+
+        # Top P slider
+        top_p = st.slider(
+            "Top P",
+            min_value=0.0,
+            max_value=1.0,
+            value=1.0,
+            step=0.01,
+            key="top_p"
+        )
+
+        # Frequency penalty slider
+        frequency_penalty = st.slider(
+            "Frequency Penalty",
+            min_value=-2.0,
+            max_value=2.0,
+            value=0.0,
+            step=0.1,
+            key="frequency_penalty"
+        )
+
+        # Presence penalty slider
+        presence_penalty = st.slider(
+            "Presence Penalty",
+            min_value=-2.0,
+            max_value=2.0,
+            value=0.0,
+            step=0.1,
+            key="presence_penalty"
+        )
+
+        # Max Tokens dropdown
+        max_tokens_options = {
+            "256": 256,
+            "512": 512,
+            "1K": 1024,
+            "2K": 2048,
+            "4K": 4096,
+            "8K": 8192
+        }
+        max_tokens = st.selectbox(
+            "Max Tokens",
+            options=list(max_tokens_options.keys()),
+            format_func=lambda x: x,
+            key="max_tokens"
+        )
+        max_tokens_value = max_tokens_options[max_tokens]
 
     with placeholder_tab:
         # This tab is intentionally left empty
@@ -173,16 +264,15 @@ with content_column:
             word_count = st.slider("Word Count", 50, 200, prompt_helper.get_block_prompt_elem(block, "word_count", 60), key=f"{block}_word_count_slider")
             prompt_helper.update_block_prompt_elem(block, "word_count", word_count)  # User input sent
             
-            # User input for keywords
-            keywords = st.text_input("Keywords", prompt_helper.get_block_prompt_elem(block, "keywords"), key=f"{block}_keywords_input")
-            prompt_helper.update_block_prompt_elem(block, "keywords", keywords)  # User input sent
-            
             # User toggle for keywords
             if st.checkbox("Toggle Keywords", key=f"{block}_tgl_keywords", value=toggles_helper.get_block_toggle_state(block, "tgl_keywords")):
-                toggles_helper.update_block_toggle_state(block, "tgl_keywords", True)  # User toggle input sent
+                toggles_helper.update_block_toggle_state(block, "tgl_keywords", True)
+                # User input for keywords (only shown when toggle is activated)
+                keywords = st.text_input("Keywords", prompt_helper.get_block_prompt_elem(block, "keywords"), key=f"{block}_keywords_input")
+                prompt_helper.update_block_prompt_elem(block, "keywords", keywords)  # User input sent
             else:
-                toggles_helper.update_block_toggle_state(block, "tgl_keywords", False)  # User toggle input sent
-                prompt_helper.update_block_prompt_elem(block, "keywords", "")  # User input sent (clearing keywords)
+                toggles_helper.update_block_toggle_state(block, "tgl_keywords", False)
+                prompt_helper.update_block_prompt_elem(block, "keywords", "")
 
             # Debug information
             st.text_area(f"Debug: Prompt for {block}", prompt_helper.get_formatted_prompt(block), height=150)

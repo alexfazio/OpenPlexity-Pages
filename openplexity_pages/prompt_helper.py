@@ -65,7 +65,11 @@ def get_formatted_prompt(block):
     # Fetch word count from block_elements, which is updated by app.py
     word_count = block_elements.get('word_count', '60')
     
-    prompt = f"Write a {word_count} word article section titled '{block_elements.get('title', block)}'. "
+    # Include the story title in the prompt
+    story_title = global_elements.get('story_title', 'Untitled Story')
+    
+    prompt = f"Write a {word_count} word article section for the story titled '{story_title}'. "
+    prompt += f"This section is titled '{block_elements.get('title', block)}'. "
 
     if global_elements.get("tone_style"):
         prompt += f"Use a {global_elements['tone_style']} tone. "

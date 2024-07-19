@@ -1,6 +1,6 @@
 from toggle_states import toggle_states_structure
 
-# Initialize the toggle states with default values
+# Initialize the toggle states with all values set to False
 def initialize_toggle_states():
     toggle_states = {
         "global_tgl_elem": {toggle: False for toggle in toggle_states_structure["global_tgl_elem"]},
@@ -46,6 +46,11 @@ def get_global_toggle_state(key):
 def get_block_toggle_state(block, key):
     state = fetch_all_toggle_states()
     return state["blockwise_tgl_elem"].get(block, {}).get(key, False)
+
+# Add this function to reset all toggles to False
+def reset_all_toggles():
+    global current_toggle_states
+    current_toggle_states = initialize_toggle_states()
 
 # Initialize the toggle states
 current_toggle_states = initialize_toggle_states()
