@@ -10,6 +10,8 @@ import requests
 from serper_api import search_images
 from PIL import Image, UnidentifiedImageError
 from io import BytesIO
+import base64
+from pathlib import Path
 
 # Define story blocks
 story_blocks = ["Introduction", "Main", "Conclusion"]
@@ -82,6 +84,14 @@ def display_image_grid(images, num_cols=3):
                 continue
     
     return selected_images
+
+def img_to_bytes(img_url):
+    response = requests.get(img_url)
+    return base64.b64encode(response.content).decode()
+
+def img_to_html(img_url):
+    img_html = f"<img src='data:image/png;base64,{img_to_bytes(img_url)}' class='img-fluid'>"
+    return img_html
 
 with settings_column:
     st.header("Article Settings")
@@ -287,24 +297,45 @@ with content_column:
                         formatted_response = ""
                         for chunk in content_generator:
                             formatted_response += chunk
+                            
+                            # Add the image at the top of the content if it exists
+                            if f"{block}_image_url" in st.session_state:
+                                image_html = img_to_html(st.session_state[f"{block}_image_url"])
+                                display_content = image_html + formatted_response
+                            else:
+                                display_content = formatted_response
+                            
                             content_placeholder.markdown(f"""
                             <div class="block-content">
                                 <h2>{title}</h2>
-                                {formatted_response}
+                                {display_content}
                             </div>
                             """, unsafe_allow_html=True)
                         
-                    st.session_state[f"{block}_response"] = formatted_response
-                    st.success(f"{block} generated successfully!")
+                        # Store the complete response including the image in session state
+                        if f"{block}_image_url" in st.session_state:
+                            image_html = img_to_html(st.session_state[f"{block}_image_url"])
+                            st.session_state[f"{block}_response"] = image_html + formatted_response
+                        else:
+                            st.session_state[f"{block}_response"] = formatted_response
+                        
+                        st.success(f"{block} generated successfully!")
 
                 # Run the function
                 update_content()
             
             elif f"{block}_response" in st.session_state:
+                # Add the image at the top of the content if it exists
+                if f"{block}_image_url" in st.session_state:
+                    image_html = img_to_html(st.session_state[f"{block}_image_url"])
+                    display_content = image_html + st.session_state[f'{block}_response']
+                else:
+                    display_content = st.session_state[f'{block}_response']
+                
                 st.markdown(f"""
                 <div class="block-content">
                     <h2>{prompt_helper.get_block_prompt_elem(block, 'title')}</h2>
-                    {st.session_state[f'{block}_response']}
+                    {display_content}
                 </div>
                 """, unsafe_allow_html=True)
         
@@ -350,6 +381,14 @@ with content_column:
                             try:
                                 st.image(img_url, caption=f"Selected Image for {block}", use_column_width=True)
                                 st.session_state[f"{block}_image_url"] = img_url
+                                
+                                # Add the selected image to the story block content
+                                if f"{block}_response" in st.session_state:
+                                    image_html = img_to_html(img_url)
+                                    st.session_state[f"{block}_response"] = image_html + st.session_state[f"{block}_response"].replace(image_html, "", 1)
+                                
+                                st.success(f"Image added to {block} content. Check the Output tab to see the result.")
+                                st.experimental_rerun()  # Force a rerun to update the output tab
                             except Exception as e:
                                 st.error(f"Error displaying selected image: {str(e)}")
                 else:
