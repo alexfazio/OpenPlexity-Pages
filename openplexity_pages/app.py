@@ -7,6 +7,9 @@ from rentry import export_to_rentry
 import webbrowser
 from toggle_states import toggle_states_structure
 import requests
+from serper_api import search_images
+from PIL import Image, UnidentifiedImageError
+from io import BytesIO
 
 # Define story blocks
 story_blocks = ["Introduction", "Main", "Conclusion"]
@@ -61,10 +64,29 @@ def toggle_callback(toggle):
     if not value:
         prompt_helper.update_global_prompt_elem(toggle, "")
 
+def display_image_grid(images, num_cols=3):
+    cols = st.columns(num_cols)
+    selected_images = []
+
+    for i, image in enumerate(images):
+        with cols[i % num_cols]:
+            try:
+                response = requests.get(image['imageUrl'], timeout=5)
+                response.raise_for_status()
+                img = Image.open(BytesIO(response.content))
+                st.image(img, use_column_width=True)
+                if st.checkbox(f"Select Image {i+1}", key=f"checkbox_{i}"):
+                    selected_images.append(image['imageUrl'])
+            except (requests.RequestException, UnidentifiedImageError, IOError) as e:
+                st.error(f"Error loading image {i+1}: {str(e)}")
+                continue
+    
+    return selected_images
+
 with settings_column:
     st.header("Article Settings")
     
-    settings_tab, ai_api_settings_tab, image_search_api_tab, placeholder_tab = st.tabs(["Settings", "AI API Settings", "Image Search API", ""])
+    settings_tab, ai_api_settings_tab, image_search_api_tab = st.tabs(["Settings", "AI API Settings", "Image Search API"])
     
     with settings_tab:
         # Global toggles
@@ -202,48 +224,10 @@ with settings_column:
     with image_search_api_tab:
         st.subheader("Serper API Settings")
         
-        # API key input for Serper
-        serper_api_key = st.text_input(
-            "Serper API Key",
-            type="password",
-            key="serper_api_key"
-        )
-        
         # Warning message moved below the API key input
         st.warning("You need an API key from Serper API to use this feature. Get your API key at [https://serper.dev/](https://serper.dev/)")
         
         # Add any additional Serper API settings here if needed
-
-    with placeholder_tab:
-        # This tab is intentionally left empty
-        pass
-
-# Add this placeholder function at the top of the file
-def search_image(query):
-    api_key = st.session_state.get('serper_api_key')
-    if not api_key:
-        st.warning("Please enter a Serper API key in the Image Search API settings.")
-        return None
-
-    url = "https://serpapi.com/search.json"
-    params = {
-        "q": query,
-        "tbm": "isch",
-        "api_key": api_key
-    }
-
-    try:
-        response = requests.get(url, params=params)
-        response.raise_for_status()  # Raise an exception for bad status codes
-        data = response.json()
-        if 'images_results' in data and len(data['images_results']) > 0:
-            return data['images_results'][0]['original']
-        else:
-            st.warning("No images found for the given query.")
-            return None
-    except requests.RequestException as e:
-        st.warning(f"Failed to fetch image from Serper API: {str(e)}")
-        return None
 
 # Content column
 with content_column:
@@ -354,16 +338,28 @@ with content_column:
 
         with image_tab:
             st.subheader(f"Image Search for {block}")
-            image_query = st.text_input(f"Search query for {block} image", key=f"{block}_image_query")
-            if st.button(f"Search Image for {block}", key=f"{block}_search_image"):
-                image_url = search_image(image_query)
-                if image_url:
-                    st.image(image_url, caption=f"Image for {block}", use_column_width=True)
-                    st.session_state[f"{block}_image_url"] = image_url
+            image_query = st.chat_input(f"Enter search query for {block} image", key=f"{block}_image_query")
+            if image_query:  # This will trigger when the user submits the chat input
+                with st.spinner("Searching for images..."):
+                    images = search_images(image_query)
+                if images:
+                    selected_images = display_image_grid(images)
+                    if selected_images:
+                        st.subheader("Selected Images:")
+                        for img_url in selected_images:
+                            try:
+                                st.image(img_url, caption=f"Selected Image for {block}", use_column_width=True)
+                                st.session_state[f"{block}_image_url"] = img_url
+                            except Exception as e:
+                                st.error(f"Error displaying selected image: {str(e)}")
                 else:
-                    st.warning("Unable to fetch image. Please check your API key and try again.")
+                    st.warning("No images found for the given query. Please try a different search term.")
             elif f"{block}_image_url" in st.session_state:
-                st.image(st.session_state[f"{block}_image_url"], caption=f"Image for {block}", use_column_width=True)
+                try:
+                    st.image(st.session_state[f"{block}_image_url"], caption=f"Image for {block}", use_column_width=True)
+                except Exception as e:
+                    st.error(f"Error displaying saved image: {str(e)}")
+                    del st.session_state[f"{block}_image_url"]
 
     # Close the content-column div
     st.markdown('</div>', unsafe_allow_html=True)
