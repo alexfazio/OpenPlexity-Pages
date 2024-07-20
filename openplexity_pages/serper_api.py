@@ -41,3 +41,9 @@ def get_first_image_url(query):
     if images and len(images) > 0:
         return images[0]['imageUrl']
     return None
+
+def get_first_image_url(query):
+    images = search_images(query, num_images=1)
+    if images and len(images) > 0:
+        return images[0]['imageUrl']
+    return None

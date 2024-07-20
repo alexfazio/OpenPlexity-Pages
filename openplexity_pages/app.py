@@ -12,6 +12,7 @@ from PIL import Image, UnidentifiedImageError
 from io import BytesIO
 import base64
 from pathlib import Path
+from streamlit_image_select import image_select
 
 # Define story blocks
 story_blocks = ["Introduction", "Main", "Conclusion"]
@@ -49,7 +50,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Place the image at the top of the page
-st.markdown('<img src="https://i.imgur.com/foi8itb.png" alt="Openplexity Pages" class="centered-image">', unsafe_allow_html=True)
+st.markdown('<img src="https://i.imgur.com/foi8itb.png" alt="Openplexity Pages" class="centered-image">',
+            unsafe_allow_html=True)
 
 # Create three columns: Settings, Content, and Outline/Preview
 settings_column, content_column, outline_column = st.columns([1, 2, 1])
@@ -59,6 +61,7 @@ if 'toggles_initialized' not in st.session_state:
     toggles_helper.reset_all_toggles()
     st.session_state.toggles_initialized = True
 
+
 def toggle_callback(toggle):
     st.session_state[toggle] = not st.session_state.get(toggle, False)
     value = st.session_state[toggle]
@@ -66,33 +69,17 @@ def toggle_callback(toggle):
     if not value:
         prompt_helper.update_global_prompt_elem(toggle, "")
 
-def display_image_grid(images, num_cols=3):
-    cols = st.columns(num_cols)
-    selected_images = []
-
-    for i, image in enumerate(images):
-        with cols[i % num_cols]:
-            try:
-                response = requests.get(image['imageUrl'], timeout=5)
-                response.raise_for_status()
-                img = Image.open(BytesIO(response.content))
-                st.image(img, use_column_width=True)
-                if st.checkbox(f"Select Image {i+1}", key=f"checkbox_{i}"):
-                    selected_images.append(image['imageUrl'])
-            except (requests.RequestException, UnidentifiedImageError, IOError) as e:
-                st.error(f"Error loading image {i+1}: {str(e)}")
-                continue
-
-    return selected_images
 
 def img_to_html(img_url):
     img_html = f"<img src='{img_url}' class='img-fluid'>"
     return img_html
 
+
 with settings_column:
     st.header("Article Settings")
 
-    settings_tab, ai_api_settings_tab, image_search_api_tab = st.tabs(["Settings", "AI API Settings", "Image Search API"])
+    settings_tab, ai_api_settings_tab, image_search_api_tab = st.tabs(
+        ["Settings", "AI API Settings", "Image Search API"])
 
     with settings_tab:
         # Global toggles
@@ -103,7 +90,8 @@ with settings_column:
             # Convert toggle name to a more readable format
             label = " ".join(toggle.split("_")[1:]).title()
 
-            if st.checkbox(f"Toggle {label}", key=f"toggle_{toggle}", value=st.session_state[toggle], on_change=toggle_callback, args=(toggle,)):
+            if st.checkbox(f"Toggle {label}", key=f"toggle_{toggle}", value=st.session_state[toggle],
+                           on_change=toggle_callback, args=(toggle,)):
                 if toggle == "tgl_style":
                     tone_style = st.selectbox("Tone", ["Professional", "Friendly"])
                     prompt_helper.update_global_prompt_elem("tone_style", tone_style)
@@ -120,7 +108,8 @@ with settings_column:
                         prompt_helper.update_global_prompt_elem("persona_first_name", first_name)
                         prompt_helper.update_global_prompt_elem("persona_last_name", last_name)
                 elif toggle == "tgl_exemplars":
-                    examples = st.text_area("Paste Example of tone/style", prompt_helper.get_global_prompt_elem("exemplars"))
+                    examples = st.text_area("Paste Example of tone/style",
+                                            prompt_helper.get_global_prompt_elem("exemplars"))
                     prompt_helper.update_global_prompt_elem("exemplars", examples)
 
     with ai_api_settings_tab:
@@ -168,7 +157,6 @@ with settings_column:
             step=0.1,
             key="model_temperature"
         )
-
 
         # Top K slider
         top_k = st.slider(
@@ -231,7 +219,8 @@ with settings_column:
         st.subheader("Serper API Settings")
 
         # Warning message moved below the API key input
-        st.warning("You need an API key from Serper API to use this feature. Get your API key at [https://serper.dev/](https://serper.dev/)")
+        st.warning(
+            "You need an API key from Serper API to use this feature. Get your API key at [https://serper.dev/](https://serper.dev/)")
 
         # Add any additional Serper API settings here if needed
 
@@ -259,7 +248,8 @@ with content_column:
     if 'story_title' not in st.session_state:
         st.session_state.story_title = "Create a New Article"
 
-    header_placeholder.markdown(f'<div class="centered-title">{st.session_state.story_title}</div>', unsafe_allow_html=True)
+    header_placeholder.markdown(f'<div class="centered-title">{st.session_state.story_title}</div>',
+                                unsafe_allow_html=True)
 
     # Display the chat input
     story_title = st.chat_input("Story Title", key="story_title_input")
@@ -267,7 +257,8 @@ with content_column:
         # Convert the story title to title case
         st.session_state.story_title = story_title.title()
         prompt_helper.update_global_prompt_elem("story_title", st.session_state.story_title)
-        header_placeholder.markdown(f'<div class="centered-title">{st.session_state.story_title}</div>', unsafe_allow_html=True)
+        header_placeholder.markdown(f'<div class="centered-title">{st.session_state.story_title}</div>',
+                                    unsafe_allow_html=True)
 
     # Story blocks
     for block in story_blocks:
@@ -281,6 +272,7 @@ with content_column:
 
                 # Create a placeholder for the streamed content
                 output_placeholder = st.empty()
+
 
                 # Function to update the placeholder with streamed content
                 def update_content():
@@ -317,6 +309,7 @@ with content_column:
 
                         st.success(f"{block} generated successfully!")
 
+
                 # Run the function
                 update_content()
 
@@ -334,27 +327,32 @@ with content_column:
                     {display_content}
                 </div>
                 """, unsafe_allow_html=True)
-        
+
         with settings_tab:
             # User input for word count
-            word_count = st.slider("Word Count", 50, 200, prompt_helper.get_block_prompt_elem(block, "word_count", 60), key=f"{block}_word_count_slider")
+            word_count = st.slider("Word Count", 50, 200, prompt_helper.get_block_prompt_elem(block, "word_count", 60),
+                                   key=f"{block}_word_count_slider")
             prompt_helper.update_block_prompt_elem(block, "word_count", word_count)  # User input sent
-            
+
             # User toggle for keywords
-            if st.checkbox("Toggle Keywords", key=f"{block}_tgl_keywords", value=toggles_helper.get_block_toggle_state(block, "tgl_keywords")):
+            if st.checkbox("Toggle Keywords", key=f"{block}_tgl_keywords",
+                           value=toggles_helper.get_block_toggle_state(block, "tgl_keywords")):
                 toggles_helper.update_block_toggle_state(block, "tgl_keywords", True)
                 # User input for keywords (only shown when toggle is activated)
-                keywords = st.text_input("Keywords", prompt_helper.get_block_prompt_elem(block, "keywords"), key=f"{block}_keywords_input")
+                keywords = st.text_input("Keywords", prompt_helper.get_block_prompt_elem(block, "keywords"),
+                                         key=f"{block}_keywords_input")
                 prompt_helper.update_block_prompt_elem(block, "keywords", keywords)  # User input sent
             else:
                 toggles_helper.update_block_toggle_state(block, "tgl_keywords", False)
                 prompt_helper.update_block_prompt_elem(block, "keywords", "")
 
             # New: User toggle for custom notes
-            if st.checkbox("Toggle Custom Notes", key=f"{block}_tgl_notes", value=toggles_helper.get_block_toggle_state(block, "tgl_notes")):
+            if st.checkbox("Toggle Custom Notes", key=f"{block}_tgl_notes",
+                           value=toggles_helper.get_block_toggle_state(block, "tgl_notes")):
                 toggles_helper.update_block_toggle_state(block, "tgl_notes", True)
                 # User input for custom notes (only shown when toggle is activated)
-                notes = st.text_area("Custom Notes", prompt_helper.get_block_prompt_elem(block, "notes"), key=f"{block}_notes_input", height=150)
+                notes = st.text_area("Custom Notes", prompt_helper.get_block_prompt_elem(block, "notes"),
+                                     key=f"{block}_notes_input", height=150)
                 prompt_helper.update_block_prompt_elem(block, "notes", notes)  # User input sent
             else:
                 toggles_helper.update_block_toggle_state(block, "tgl_notes", False)
@@ -370,23 +368,26 @@ with content_column:
                 with st.spinner("Searching for images..."):
                     images = search_images(image_query)
                 if images:
-                    selected_images = display_image_grid(images)
-                    if selected_images:
-                        st.subheader("Selected Images:")
-                        for img_url in selected_images:
-                            try:
-                                st.image(img_url, caption=f"Selected Image for {block}", use_column_width=True)
-                                st.session_state[f"{block}_image_url"] = img_url
+                    image_urls = [img['imageUrl'] for img in images]
+                    selected_image = image_select(
+                        label="Select an image",
+                        images=image_urls,
+                        captions=[f"Image {i+1}" for i in range(len(image_urls))],
+                        use_container_width=True
+                    )
+                    if selected_image:
+                        try:
+                            st.image(selected_image, caption=f"Selected Image for {block}", use_column_width=True)
+                            st.session_state[f"{block}_image_url"] = selected_image
 
-                                # Add the selected image to the story block content
-                                if f"{block}_response" in st.session_state:
-                                    image_html = img_to_html(img_url)
-                                    st.session_state[f"{block}_response"] = image_html + st.session_state[f"{block}_response"].replace(image_html, "", 1)
+                            # Add the selected image to the story block content
+                            if f"{block}_response" in st.session_state:
+                                image_html = img_to_html(selected_image)
+                                st.session_state[f"{block}_response"] = image_html + st.session_state[f"{block}_response"].replace(image_html, "", 1)
 
-                                st.success(f"Image added to {block} content. Check the Output tab to see the result.")
-                                st.experimental_rerun()  # Force a rerun to update the output tab
-                            except Exception as e:
-                                st.error(f"Error displaying selected image: {str(e)}")
+                            st.success(f"Image added to {block} content. Check the Output tab to see the result.")
+                        except Exception as e:
+                            st.error(f"Error displaying selected image: {str(e)}")
                 else:
                     st.warning("No images found for the given query. Please try a different search term.")
             elif f"{block}_image_url" in st.session_state:
@@ -402,9 +403,9 @@ with content_column:
 # New outline_column
 with outline_column:
     st.header("Overview")
-    
+
     outline_tab, export_tab = st.tabs(["Outline", "Export"])
-    
+
     with outline_tab:
         st.subheader("Article Outline")
         for block in story_blocks:
@@ -413,7 +414,7 @@ with outline_column:
                 st.markdown(f"- **{block}**: {block_title}")
             else:
                 st.markdown(f"- **{block}**: *No title set*")
-    
+
     with export_tab:
         if st.button("Export to Rentry"):
             # Generate full content here
@@ -431,10 +432,10 @@ with outline_column:
             if rentry_url:
                 st.success(f"Successfully exported to Rentry. URL: {rentry_url}")
                 st.info(f"Edit code: {edit_code}")
-                
+
                 # Open the Rentry URL in a new browser tab
                 webbrowser.open_new_tab(rentry_url)
-                
+
                 # Provide a manual link in case automatic opening fails
                 st.markdown(f"If the page doesn't open automatically, [click here to view your Rentry]({rentry_url})")
             else:

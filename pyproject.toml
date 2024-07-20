@@ -19,6 +19,7 @@ openai = "^1.35.14"
 watchdog = "^4.0.1"
 certifi = "^2024.7.4"
 vertexai = "^1.49.0"
+streamlit-image-select = "^0.6.0"
 
 [build-system]
 requires = ["poetry-core"]
