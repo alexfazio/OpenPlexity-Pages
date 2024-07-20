@@ -82,31 +82,27 @@ def display_image_grid(images, num_cols=3):
             except (requests.RequestException, UnidentifiedImageError, IOError) as e:
                 st.error(f"Error loading image {i+1}: {str(e)}")
                 continue
-    
+
     return selected_images
 
-def img_to_bytes(img_url):
-    response = requests.get(img_url)
-    return base64.b64encode(response.content).decode()
-
 def img_to_html(img_url):
-    img_html = f"<img src='data:image/png;base64,{img_to_bytes(img_url)}' class='img-fluid'>"
+    img_html = f"<img src='{img_url}' class='img-fluid'>"
     return img_html
 
 with settings_column:
     st.header("Article Settings")
-    
+
     settings_tab, ai_api_settings_tab, image_search_api_tab = st.tabs(["Settings", "AI API Settings", "Image Search API"])
-    
+
     with settings_tab:
         # Global toggles
         for toggle in toggle_states_structure["global_tgl_elem"]:
             if toggle not in st.session_state:
                 st.session_state[toggle] = toggles_helper.get_global_toggle_state(toggle)
-            
+
             # Convert toggle name to a more readable format
             label = " ".join(toggle.split("_")[1:]).title()
-            
+
             if st.checkbox(f"Toggle {label}", key=f"toggle_{toggle}", value=st.session_state[toggle], on_change=toggle_callback, args=(toggle,)):
                 if toggle == "tgl_style":
                     tone_style = st.selectbox("Tone", ["Professional", "Friendly"])
@@ -129,14 +125,14 @@ with settings_column:
 
     with ai_api_settings_tab:
         st.subheader("AI API Settings")
-        
+
         # API provider dropdown
         api_provider = st.selectbox(
             "API Provider",
             ["Perplexity", "Google"],
             key="api_provider"
         )
-        
+
         # Model selection dropdown
         if api_provider == "Perplexity":
             model = st.selectbox(
@@ -162,7 +158,7 @@ with settings_column:
                 type=["json"],
                 key="google_service_account_file"
             )
-        
+
         # Model temperature slider
         temperature = st.slider(
             "Temperature",
@@ -233,17 +229,17 @@ with settings_column:
 
     with image_search_api_tab:
         st.subheader("Serper API Settings")
-        
+
         # Warning message moved below the API key input
         st.warning("You need an API key from Serper API to use this feature. Get your API key at [https://serper.dev/](https://serper.dev/)")
-        
+
         # Add any additional Serper API settings here if needed
 
 # Content column
 with content_column:
     # Add a div with class 'content-column' to target the CSS
     st.markdown('<div class="content-column">', unsafe_allow_html=True)
-    
+
     # Add custom CSS for centering the title
     st.markdown("""
         <style>
@@ -255,16 +251,16 @@ with content_column:
         }
         </style>
     """, unsafe_allow_html=True)
-    
+
     # Create a placeholder for the centered header
     header_placeholder = st.empty()
-    
+
     # Display the default title or the user-provided title
     if 'story_title' not in st.session_state:
         st.session_state.story_title = "Create a New Article"
-    
+
     header_placeholder.markdown(f'<div class="centered-title">{st.session_state.story_title}</div>', unsafe_allow_html=True)
-    
+
     # Display the chat input
     story_title = st.chat_input("Story Title", key="story_title_input")
     if story_title:
@@ -272,58 +268,58 @@ with content_column:
         st.session_state.story_title = story_title.title()
         prompt_helper.update_global_prompt_elem("story_title", st.session_state.story_title)
         header_placeholder.markdown(f'<div class="centered-title">{st.session_state.story_title}</div>', unsafe_allow_html=True)
-    
+
     # Story blocks
     for block in story_blocks:
         output_tab, settings_tab, image_tab = st.tabs(["Output", "Settings", "Image"])
-        
+
         with output_tab:
             title = st.chat_input(f"{block} Title", key=f"{block}_title_input")
-            
+
             if title:
                 prompt_helper.update_block_prompt_elem(block, "title", title)
-                
+
                 # Create a placeholder for the streamed content
                 output_placeholder = st.empty()
-                
+
                 # Function to update the placeholder with streamed content
                 def update_content():
                     with st.spinner(f"Generating {block} content..."):
                         content_generator = prompt_helper.generate_content(block)
-                        
+
                         # Create a placeholder for the streamed content
                         content_placeholder = output_placeholder.empty()
-                        
+
                         formatted_response = ""
                         for chunk in content_generator:
                             formatted_response += chunk
-                            
+
                             # Add the image at the top of the content if it exists
                             if f"{block}_image_url" in st.session_state:
                                 image_html = img_to_html(st.session_state[f"{block}_image_url"])
                                 display_content = image_html + formatted_response
                             else:
                                 display_content = formatted_response
-                            
+
                             content_placeholder.markdown(f"""
                             <div class="block-content">
                                 <h2>{title}</h2>
                                 {display_content}
                             </div>
                             """, unsafe_allow_html=True)
-                        
+
                         # Store the complete response including the image in session state
                         if f"{block}_image_url" in st.session_state:
                             image_html = img_to_html(st.session_state[f"{block}_image_url"])
                             st.session_state[f"{block}_response"] = image_html + formatted_response
                         else:
                             st.session_state[f"{block}_response"] = formatted_response
-                        
+
                         st.success(f"{block} generated successfully!")
 
                 # Run the function
                 update_content()
-            
+
             elif f"{block}_response" in st.session_state:
                 # Add the image at the top of the content if it exists
                 if f"{block}_image_url" in st.session_state:
@@ -331,7 +327,7 @@ with content_column:
                     display_content = image_html + st.session_state[f'{block}_response']
                 else:
                     display_content = st.session_state[f'{block}_response']
-                
+
                 st.markdown(f"""
                 <div class="block-content">
                     <h2>{prompt_helper.get_block_prompt_elem(block, 'title')}</h2>
@@ -381,12 +377,12 @@ with content_column:
                             try:
                                 st.image(img_url, caption=f"Selected Image for {block}", use_column_width=True)
                                 st.session_state[f"{block}_image_url"] = img_url
-                                
+
                                 # Add the selected image to the story block content
                                 if f"{block}_response" in st.session_state:
                                     image_html = img_to_html(img_url)
                                     st.session_state[f"{block}_response"] = image_html + st.session_state[f"{block}_response"].replace(image_html, "", 1)
-                                
+
                                 st.success(f"Image added to {block} content. Check the Output tab to see the result.")
                                 st.experimental_rerun()  # Force a rerun to update the output tab
                             except Exception as e:
