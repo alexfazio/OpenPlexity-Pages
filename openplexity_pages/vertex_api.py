@@ -3,7 +3,6 @@ from google.oauth2 import service_account
 import vertexai
 from vertexai.generative_models import Part, GenerationConfig
 from vertexai.preview.generative_models import GenerativeModel as PreviewGenerativeModel
-from vertexai.preview.language_models import TextGenerationModel
 import re
 
 def generate():
@@ -42,62 +41,56 @@ def generate():
         generation_config=generation_config,
     )
 
-    full_response = ""
-    search_query = ""
-    metadata = {}
-    citations = []
+    # Return the entire response object
+    return response
 
-    if response.text:
-        full_response = response.text
-
-    # Extract metadata and citations if available
-    if hasattr(response, 'candidates') and response.candidates:
-        candidate = response.candidates[0]
-        if hasattr(candidate, 'citation_metadata'):
-            metadata['citation_metadata'] = str(candidate.citation_metadata)
-            if hasattr(candidate.citation_metadata, 'citations'):
-                citations = [
-                    {"url": citation.url, "title": citation.title}
-                    for citation in candidate.citation_metadata.citations
-                ]
-
-    return full_response, search_query, metadata, citations
+def extract_citations(text):
+    # Extract sources from the end of the text
+    sources_match = re.search(r'\*\*Sources:\*\*\n(.*)', text, re.DOTALL)
+    if sources_match:
+        sources_text = sources_match.group(1)
+        citations = []
+        for line in sources_text.split('\n'):
+            if line.strip():
+                parts = line.split(': ', 1)
+                if len(parts) == 2:
+                    citations.append({"title": parts[0].strip('* '), "url": parts[1].strip()})
+        return citations
+    return []
 
 def format_response_with_citations(response, citations):
-    formatted_response = response
+    formatted_response = re.sub(r'\*\*Sources:\*\*\n.*', '', response, flags=re.DOTALL).strip()
 
-    # Add inline citations
     for i, citation in enumerate(citations, 1):
-        citation_marker = f"[^{i}]"
-        if f"[{i}]" in formatted_response:
-            formatted_response = formatted_response.replace(f"[{i}]", citation_marker)
-        else:
-            # If no placeholder exists, append the citation to the end of the relevant sentence
-            sentences = formatted_response.split('. ')
-            for j, sentence in enumerate(sentences):
-                if citation['title'].lower() in sentence.lower():
-                    sentences[j] = f"{sentence}{citation_marker}"
-                    break
-            formatted_response = '. '.join(sentences)
+        citation_marker = f"[^{i}]({citation['url']})"
+        
+        sentences = re.split('(?<=[.!?]) +', formatted_response)
+        
+        most_relevant_sentence = max(sentences, key=lambda s: len(set(s.lower().split()) & set(citation['title'].lower().split())))
+        
+        formatted_response = formatted_response.replace(most_relevant_sentence, f"{most_relevant_sentence}{citation_marker}")
 
-    # Add aggregate citations at the end
     formatted_response += "\n\n## Sources\n"
     for i, citation in enumerate(citations, 1):
-        formatted_response += f"[^{i}]: [{citation['title']}]({citation['url']})\n"
+        formatted_response += f"{i}. [{citation['title']}]({citation['url']})\n"
     
     return formatted_response
 
+
 if __name__ == "__main__":
     try:
-        result, query, metadata, citations = generate()
-        if result:
+        response = generate()
+        if response.text:
             print("\nGeneration completed successfully.")
+            print("Raw API Response:")
+            print(response)
+            
+            result = response.text
+            citations = extract_citations(result)
+            
             formatted_result = format_response_with_citations(result, citations)
-            print("Final result with inline and aggregate citations (Markdown):")
+            print("\nFormatted result with inline and aggregate citations (Markdown):")
             print(formatted_result)
-            print("\nMetadata:")
-            for key, value in metadata.items():
-                print(f"{key}: {value}")
         else:
             print("\nGeneration did not produce a valid result.")
     except Exception as e:
