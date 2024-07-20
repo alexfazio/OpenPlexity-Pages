@@ -83,11 +83,17 @@ with settings_column:
                     audience = st.selectbox("Audience", ["Students", "Tech Enthusiasts", "General Public"])
                     prompt_helper.update_global_prompt_elem("audience", audience)
                 elif toggle == "tgl_persona":
-                    role = st.selectbox("Role", ["Shakespeare", "Martin", "Tolkien"])
-                    prompt_helper.update_global_prompt_elem("role", role)
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        first_name = st.text_input("First Name", key="persona_first_name")
+                    with col2:
+                        last_name = st.text_input("Last Name", key="persona_last_name")
+                    if first_name and last_name:
+                        prompt_helper.update_global_prompt_elem("persona_first_name", first_name)
+                        prompt_helper.update_global_prompt_elem("persona_last_name", last_name)
                 elif toggle == "tgl_exemplars":
-                    exemplars = st.text_area("Examples", prompt_helper.get_global_prompt_elem("exemplars"))
-                    prompt_helper.update_global_prompt_elem("exemplars", exemplars)
+                    examples = st.text_area("Paste Example of tone/style", prompt_helper.get_global_prompt_elem("exemplars"))
+                    prompt_helper.update_global_prompt_elem("exemplars", examples)
 
     with ai_api_settings_tab:
         st.subheader("AI API Settings")

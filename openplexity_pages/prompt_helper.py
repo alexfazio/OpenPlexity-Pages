@@ -5,7 +5,8 @@ DEFAULT_GLOBAL_PROMPT_ELEM = {
     "story_title": "The Future of AI",
     "tone_style": "",
     "audience": "",
-    "role": "",
+    "persona_first_name": "",
+    "persona_last_name": "",
     "exemplars": ""
 }
 
@@ -77,8 +78,9 @@ def get_formatted_prompt(block):
     if global_elements.get("audience"):
         prompt += f"Target audience: {global_elements['audience']}. "
 
-    if global_elements.get("role"):
-        prompt += f"Write in the style of {global_elements['role']}. "
+    if global_elements.get("persona_first_name") and global_elements.get("persona_last_name"):
+        full_name = f"{global_elements['persona_first_name']} {global_elements['persona_last_name']}"
+        prompt += f"Write in the style of {full_name}. "
 
     if global_elements.get("exemplars"):
         prompt += f"Use this as an example of the desired tone: {global_elements['exemplars']}. "
