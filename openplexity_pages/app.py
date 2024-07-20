@@ -1,12 +1,12 @@
 import streamlit as st
 import toggles_helper
 import prompt_helper
-import ppl_api
 import time
 import random
-from rentry import export_to_rentry  # Add this import
-import webbrowser  # Add this import
-from toggle_states import toggle_states_structure  # Import the toggle states structure
+from rentry import export_to_rentry
+import webbrowser
+from toggle_states import toggle_states_structure
+import requests
 
 # Define story blocks
 story_blocks = ["Introduction", "Main", "Conclusion"]
@@ -64,7 +64,7 @@ def toggle_callback(toggle):
 with settings_column:
     st.header("Article Settings")
     
-    settings_tab, ai_api_settings_tab, placeholder_tab = st.tabs(["Settings", "AI API Settings", ""])
+    settings_tab, ai_api_settings_tab, image_search_api_tab, placeholder_tab = st.tabs(["Settings", "AI API Settings", "Image Search API", ""])
     
     with settings_tab:
         # Global toggles
@@ -101,38 +101,35 @@ with settings_column:
         # API provider dropdown
         api_provider = st.selectbox(
             "API Provider",
-            ["OpenAI", "Anthropic", "Google", "Other"],
+            ["Perplexity", "Google"],
             key="api_provider"
         )
         
         # Model selection dropdown
-        if api_provider == "OpenAI":
+        if api_provider == "Perplexity":
             model = st.selectbox(
                 "Model",
-                ["gpt-3.5-turbo", "gpt-4", "text-davinci-003"],
-                key="openai_model"
+                ["llama-3-sonar-large-32k-online", "llama-3-sonar-small-32k-online"],
+                key="perplexity_model"
             )
-        elif api_provider == "Anthropic":
-            model = st.selectbox(
-                "Model",
-                ["claude-v1", "claude-instant-v1"],
-                key="anthropic_model"
+            # API key input for Perplexity
+            api_key = st.text_input(
+                "API Key",
+                type="password",
+                key="perplexity_api_key"
             )
         elif api_provider == "Google":
             model = st.selectbox(
                 "Model",
-                ["palm-2", "text-bison-001"],
+                ["gemini-1.5-flash-001", "gemini-1.5-pro-001", "gemini-1.0-pro-002", "gemini-1.0-pro-001"],
                 key="google_model"
             )
-        else:
-            model = st.text_input("Model", key="other_model")
-        
-        # API key input
-        api_key = st.text_input(
-            "API Key",
-            type="password",
-            key="api_key"
-        )
+            # Service account file upload for Google
+            service_account_file = st.file_uploader(
+                "Upload Service Account JSON File",
+                type=["json"],
+                key="google_service_account_file"
+            )
         
         # Model temperature slider
         temperature = st.slider(
@@ -202,14 +199,51 @@ with settings_column:
         )
         max_tokens_value = max_tokens_options[max_tokens]
 
+    with image_search_api_tab:
+        st.subheader("Serper API Settings")
+        
+        # API key input for Serper
+        serper_api_key = st.text_input(
+            "Serper API Key",
+            type="password",
+            key="serper_api_key"
+        )
+        
+        # Warning message moved below the API key input
+        st.warning("You need an API key from Serper API to use this feature. Get your API key at [https://serper.dev/](https://serper.dev/)")
+        
+        # Add any additional Serper API settings here if needed
+
     with placeholder_tab:
         # This tab is intentionally left empty
         pass
 
 # Add this placeholder function at the top of the file
 def search_image(query):
-    # Placeholder function - replace with actual image search API later
-    return f"https://placekitten.com/{random.randint(300, 500)}/{random.randint(300, 500)}"
+    api_key = st.session_state.get('serper_api_key')
+    if not api_key:
+        st.warning("Please enter a Serper API key in the Image Search API settings.")
+        return None
+
+    url = "https://serpapi.com/search.json"
+    params = {
+        "q": query,
+        "tbm": "isch",
+        "api_key": api_key
+    }
+
+    try:
+        response = requests.get(url, params=params)
+        response.raise_for_status()  # Raise an exception for bad status codes
+        data = response.json()
+        if 'images_results' in data and len(data['images_results']) > 0:
+            return data['images_results'][0]['original']
+        else:
+            st.warning("No images found for the given query.")
+            return None
+    except requests.RequestException as e:
+        st.warning(f"Failed to fetch image from Serper API: {str(e)}")
+        return None
 
 # Content column
 with content_column:
@@ -228,61 +262,65 @@ with content_column:
         </style>
     """, unsafe_allow_html=True)
     
-    try:
-        default_title = prompt_helper.get_global_prompt_elem("story_title", "The Future of AI")
-    except Exception as e:
-        st.error(f"Error loading story title: {str(e)}")
-        default_title = "The Future of AI"
-    
     # Create a placeholder for the centered header
     header_placeholder = st.empty()
     
-    # Display the text input
-    story_title = st.text_input("Story Title", default_title, key="story_title_input")
+    # Display the default title or the user-provided title
+    if 'story_title' not in st.session_state:
+        st.session_state.story_title = "Create a New Article"
     
-    # Check if the user has pressed Enter (i.e., the title has changed)
-    if story_title != default_title:
-        prompt_helper.update_global_prompt_elem("story_title", story_title)  # User input sent
-        # Display the centered header with the new title
-        header_placeholder.markdown(f'<div class="centered-title">{story_title}</div>', unsafe_allow_html=True)
+    header_placeholder.markdown(f'<div class="centered-title">{st.session_state.story_title}</div>', unsafe_allow_html=True)
+    
+    # Display the chat input
+    story_title = st.chat_input("Story Title", key="story_title_input")
+    if story_title:
+        # Convert the story title to title case
+        st.session_state.story_title = story_title.title()
+        prompt_helper.update_global_prompt_elem("story_title", st.session_state.story_title)
+        header_placeholder.markdown(f'<div class="centered-title">{st.session_state.story_title}</div>', unsafe_allow_html=True)
     
     # Story blocks
     for block in story_blocks:
-        # Use st.tabs() without any additional parameters
         output_tab, settings_tab, image_tab = st.tabs(["Output", "Settings", "Image"])
         
         with output_tab:
-            # User text input for block title
-            title = st.text_input(f"{block} Title", prompt_helper.get_block_prompt_elem(block, "title"), key=f"{block}_title_input")
+            title = st.chat_input(f"{block} Title", key=f"{block}_title_input")
             
-            # Check if the user has pressed Enter (i.e., the title has changed)
-            if title != prompt_helper.get_block_prompt_elem(block, "title"):
-                prompt_helper.update_block_prompt_elem(block, "title", title)  # User input sent
+            if title:
+                prompt_helper.update_block_prompt_elem(block, "title", title)
                 
-                prompt = prompt_helper.get_formatted_prompt(block)
-                
-                # Simulate streaming output
+                # Create a placeholder for the streamed content
                 output_placeholder = st.empty()
-                full_response = ""
-                for chunk in ppl_api.ppl_query_api_stream(prompt):
-                    full_response += chunk
-                    output_placeholder.markdown(f"""
-                    <div class="block-content">
-                        <h2>{title}</h2>
-                        <p>{full_response}</p>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    time.sleep(0.05)  # Adjust this value to control the streaming speed
                 
-                st.session_state[f"{block}_response"] = full_response
-                st.success(f"{block} generated successfully!")
+                # Function to update the placeholder with streamed content
+                def update_content():
+                    with st.spinner(f"Generating {block} content..."):
+                        content_generator = prompt_helper.generate_content(block)
+                        
+                        # Create a placeholder for the streamed content
+                        content_placeholder = output_placeholder.empty()
+                        
+                        formatted_response = ""
+                        for chunk in content_generator:
+                            formatted_response += chunk
+                            content_placeholder.markdown(f"""
+                            <div class="block-content">
+                                <h2>{title}</h2>
+                                {formatted_response}
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                    st.session_state[f"{block}_response"] = formatted_response
+                    st.success(f"{block} generated successfully!")
+
+                # Run the function
+                update_content()
             
-            # Display the generated content if it exists
             elif f"{block}_response" in st.session_state:
                 st.markdown(f"""
                 <div class="block-content">
                     <h2>{prompt_helper.get_block_prompt_elem(block, 'title')}</h2>
-                    <p>{st.session_state[f'{block}_response']}</p>
+                    {st.session_state[f'{block}_response']}
                 </div>
                 """, unsafe_allow_html=True)
         
@@ -319,8 +357,11 @@ with content_column:
             image_query = st.text_input(f"Search query for {block} image", key=f"{block}_image_query")
             if st.button(f"Search Image for {block}", key=f"{block}_search_image"):
                 image_url = search_image(image_query)
-                st.image(image_url, caption=f"Image for {block}", use_column_width=True)
-                st.session_state[f"{block}_image_url"] = image_url
+                if image_url:
+                    st.image(image_url, caption=f"Image for {block}", use_column_width=True)
+                    st.session_state[f"{block}_image_url"] = image_url
+                else:
+                    st.warning("Unable to fetch image. Please check your API key and try again.")
             elif f"{block}_image_url" in st.session_state:
                 st.image(st.session_state[f"{block}_image_url"], caption=f"Image for {block}", use_column_width=True)
 
@@ -331,7 +372,7 @@ with content_column:
 with outline_column:
     st.header("Overview")
     
-    outline_tab, preview_tab = st.tabs(["Outline", "Preview/Export"])
+    outline_tab, export_tab = st.tabs(["Outline", "Export"])
     
     with outline_tab:
         st.subheader("Article Outline")
@@ -342,25 +383,10 @@ with outline_column:
             else:
                 st.markdown(f"- **{block}**: *No title set*")
     
-    with preview_tab:
-        if st.button("Preview"):
-            st.markdown("### Article Preview")
-            full_content = f"# {story_title}\n\n"
-            for block in story_blocks:
-                if f"{block}_response" in st.session_state:
-                    block_title = prompt_helper.get_block_prompt_elem(block, 'title')
-                    full_content += f"## {block_title}\n\n"
-                    full_content += f"{st.session_state[f'{block}_response']}\n\n"
-                    st.markdown(f"#### {block_title}")
-                    st.markdown(st.session_state[f"{block}_response"])
-                else:
-                    st.warning(f"{block} not generated yet.")
-            
-            st.session_state['full_content'] = full_content
-
+    with export_tab:
         if st.button("Export to Rentry"):
-            # Generate full content here, regardless of whether preview was clicked
-            full_content = f"# {story_title}\n\n"
+            # Generate full content here
+            full_content = f"# {st.session_state.story_title}\n\n"
             for block in story_blocks:
                 if f"{block}_response" in st.session_state:
                     block_title = prompt_helper.get_block_prompt_elem(block, 'title')

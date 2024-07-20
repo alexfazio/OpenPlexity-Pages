@@ -1,4 +1,5 @@
 from prompt_states import prompt_states
+import vertex_api
 
 # Default values moved here
 DEFAULT_GLOBAL_PROMPT_ELEM = {
@@ -71,6 +72,7 @@ def get_formatted_prompt(block):
     
     prompt = f"Write a {word_count} word article section for the story titled '{story_title}'. "
     prompt += f"This section is titled '{block_elements.get('title', block)}'. "
+    prompt += f"Please include sources for your information as inline and aggregate citations."
 
     if global_elements.get("tone_style"):
         prompt += f"Use a {global_elements['tone_style']} tone. "
@@ -92,6 +94,18 @@ def get_formatted_prompt(block):
         prompt += f"Consider these additional notes: {block_elements['notes']}. "
 
     return prompt
+
+
+# New function to generate content using Vertex AI
+def generate_content(block):
+    prompt = get_formatted_prompt(block)
+    full_response = ""
+    for chunk in vertex_api.generate_stream(prompt):
+        full_response += chunk
+    
+    citations = vertex_api.extract_citations(full_response)
+    formatted_response = vertex_api.format_response_with_citations(full_response, citations)
+    return formatted_response
 
 
 # Initialization
