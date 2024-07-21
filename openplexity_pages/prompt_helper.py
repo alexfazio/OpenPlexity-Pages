@@ -66,7 +66,8 @@ def get_formatted_prompt(block):
     block_elements = load_general_prompt_state()["block_level_prompt_elem"].get(block, {})
 
     # Fetch word count from block_elements, which is updated by app.py
-    word_count = block_elements.get('word_count', '60') // 15
+    word_count = block_elements.get('word_count', '60') // 15 # "`// 15` converts the desired word count into an
+    # approximate sentence count, which is more easily recognized by LLMS.
 
     # Include the story title in the prompt
     story_title = global_elements.get('story_title', 'Untitled Story')
@@ -98,7 +99,7 @@ def get_formatted_prompt(block):
 
 
 # New function to generate content using Vertex AI
-def generate_content(block):
+def generate_api_response(block):
     prompt = get_formatted_prompt(block)
     try:
         full_response = ""
@@ -115,7 +116,8 @@ def generate_content(block):
 
 def get_user_friendly_error_message(error):
     if isinstance(error, ValueError) and "blocked by the safety filters" in str(error):
-        return "The content was blocked by safety filters. Please try rephrasing your request or using less controversial topics."
+        return ("The content was blocked by safety filters. Please try rephrasing your request or using less "
+                "controversial topics.")
     elif isinstance(error, Exception):
         return f"An unexpected error occurred: {str(error)}. Please try again or contact support if the issue persists."
     else:

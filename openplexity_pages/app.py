@@ -12,35 +12,35 @@ story_blocks = ["Introduction", "Main", "Conclusion"]
 
 st.set_page_config(page_title="Openplexity Pages", layout="wide")
 
-# # Custom CSS
-# st.markdown("""
-#     <style>
-#     .block-content {
-#         background-color: white;
-#         border-radius: 10px;
-#         padding: 20px;
-#         margin-bottom: 20px;
-#         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-#     }
-#     .block-content h2 {
-#         color: #1E1E1E;
-#         border-bottom: 2px solid #4CAF50;
-#         padding-bottom: 10px;
-#     }
-#     .block-content p {
-#         color: #333;
-#         line-height: 1.6;
-#     }
-#     .centered-image {
-#         display: block;
-#         margin-left: auto;
-#         margin-right: auto;
-#         max-width: 66.67%;  /* Matches the width of the center column */
-#         height: auto;
-#         padding: 20px 0;
-#     }
-#     </style>
-# """, unsafe_allow_html=True)
+# Custom CSS
+st.markdown("""
+    <style>
+    .block-content {
+        background-color: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .block-content h2 {
+        color: #1E1E1E;
+        border-bottom: 2px solid #4CAF50;
+        padding-bottom: 10px;
+    }
+    .block-content p {
+        color: #333;
+        line-height: 1.6;
+    }
+    .centered-image {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 66.67%;  /* Matches the width of the center column */
+        height: auto;
+        padding: 20px 0;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 # Place the image at the top of the page
 st.markdown('<img src="https://i.imgur.com/foi8itb.png" alt="Openplexity Pages" class="centered-image">',
@@ -299,7 +299,7 @@ with content_column:
                 def update_content():
                     with st.spinner(f"Generating {block} content..."):
                         try:
-                            content_generator = prompt_helper.generate_content(block)
+                            content_generator = prompt_helper.generate_api_response(block)
 
                             # Create a placeholder for the streamed content
                             content_placeholder = output_placeholder.empty()
