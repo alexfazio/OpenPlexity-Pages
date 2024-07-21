@@ -1,5 +1,6 @@
 from prompt_states import prompt_states
 import vertex_api
+import traceback
 
 # Default values moved here
 DEFAULT_GLOBAL_PROMPT_ELEM = {
@@ -99,14 +100,25 @@ def get_formatted_prompt(block):
 # New function to generate content using Vertex AI
 def generate_content(block):
     prompt = get_formatted_prompt(block)
-    full_response = ""
-    for chunk in vertex_api.generate_stream(prompt):
-        full_response += chunk
-    
-    citations = vertex_api.extract_citations(full_response)
-    formatted_response = vertex_api.format_response_with_citations(full_response, citations)
-    return formatted_response
+    try:
+        full_response = ""
+        for chunk in vertex_api.generate_stream(prompt):
+            full_response += chunk
+        
+        citations = vertex_api.extract_citations(full_response)
+        formatted_response = vertex_api.format_response_with_citations(full_response, citations)
+        return formatted_response
+    except Exception as e:
+        error_message = get_user_friendly_error_message(e)
+        return f"Error: {error_message}"
 
+def get_user_friendly_error_message(error):
+    if isinstance(error, ValueError) and "blocked by the safety filters" in str(error):
+        return "The content was blocked by safety filters. Please try rephrasing your request or using less controversial topics."
+    elif isinstance(error, Exception):
+        return f"An unexpected error occurred: {str(error)}. Please try again or contact support if the issue persists."
+    else:
+        return "An unknown error occurred. Please try again or contact support if the issue persists."
 
 # Initialization
 if not prompt_states["global_prompt_elem"]:

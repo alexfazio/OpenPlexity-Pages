@@ -13,6 +13,7 @@ from io import BytesIO
 import base64
 from pathlib import Path
 from streamlit_image_select import image_select
+import traceback
 
 # Define story blocks
 story_blocks = ["Introduction", "Main", "Conclusion"]
@@ -304,38 +305,38 @@ with content_column:
                 # Function to update the placeholder with streamed content
                 def update_content():
                     with st.spinner(f"Generating {block} content..."):
-                        content_generator = prompt_helper.generate_content(block)
+                        try:
+                            content_generator = prompt_helper.generate_content(block)
 
-                        # Create a placeholder for the streamed content
-                        content_placeholder = output_placeholder.empty()
+                            # Create a placeholder for the streamed content
+                            content_placeholder = output_placeholder.empty()
 
-                        formatted_response = ""
-                        for chunk in content_generator:
-                            formatted_response += chunk
+                            formatted_response = ""
+                            for chunk in content_generator:
+                                formatted_response += chunk
 
-                            # Add the image at the top of the content if it exists
+                                # Add the image at the top of the content if it exists
+                                if f"{block}_image_url" in st.session_state:
+                                    image_html = img_to_html(st.session_state[f"{block}_image_url"])
+                                    display_content = image_html + formatted_response
+                                else:
+                                    display_content = formatted_response
+
+                                content_placeholder.markdown(f"""
+                                    {display_content}
+                                """, unsafe_allow_html=False)
+
+                            # Store the complete response including the image in session state
                             if f"{block}_image_url" in st.session_state:
                                 image_html = img_to_html(st.session_state[f"{block}_image_url"])
-                                display_content = image_html + formatted_response
+                                st.session_state[f"{block}_response"] = image_html + formatted_response
                             else:
-                                display_content = formatted_response
+                                st.session_state[f"{block}_response"] = formatted_response
 
-                            content_placeholder.markdown(f"""
-                            <div class="block-content">
-                                <h2>{title}</h2>
-                                {display_content}
-                            </div>
-                            """, unsafe_allow_html=True)
-
-                        # Store the complete response including the image in session state
-                        if f"{block}_image_url" in st.session_state:
-                            image_html = img_to_html(st.session_state[f"{block}_image_url"])
-                            st.session_state[f"{block}_response"] = image_html + formatted_response
-                        else:
-                            st.session_state[f"{block}_response"] = formatted_response
-
-                        st.success(f"{block} generated successfully!")
-
+                        except Exception as e:
+                            error_message = prompt_helper.get_user_friendly_error_message(e)
+                            st.error(f"An error occurred while generating content: {error_message}")
+                            st.button("Retry", on_click=update_content)
 
                 # Run the function
                 update_content()
