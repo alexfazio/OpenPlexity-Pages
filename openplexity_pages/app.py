@@ -379,13 +379,8 @@ with content_column:
                         try:
                             st.image(selected_image, caption=f"Selected Image for {block}", use_column_width=True)
                             st.session_state[f"{block}_image_url"] = selected_image
-
-                            # Add the selected image to the story block content
-                            if f"{block}_response" in st.session_state:
-                                image_html = img_to_html(selected_image)
-                                st.session_state[f"{block}_response"] = image_html + st.session_state[f"{block}_response"].replace(image_html, "", 1)
-
-                            st.success(f"Image added to {block} content. Check the Output tab to see the result.")
+                            
+                            st.success(f"Image selected for {block}. Click 'Update Content' to add it to the story.")
                         except Exception as e:
                             st.error(f"Error displaying selected image: {str(e)}")
                 else:
