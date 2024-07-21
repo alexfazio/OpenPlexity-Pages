@@ -113,10 +113,30 @@ with settings_column:
             if st.checkbox(f"Toggle {label}", key=f"toggle_{toggle}", value=st.session_state[toggle],
                            on_change=toggle_callback, args=(toggle,)):
                 if toggle == "tgl_style":
-                    tone_style = st.selectbox("Tone", ["Professional", "Friendly"])
+                    tone_style = st.selectbox("Tone", [
+                        "Professional", "Friendly", "Authoritative", "Sarcastic", "Funny",
+                        "Concise", "Clear", "Engaging", "Informative", "Persuasive",
+                        "Assertive", "Courteous", "Empathetic", "Emotive", "Compelling",
+                        "Conversational"
+                    ])
                     prompt_helper.update_global_prompt_elem("tone_style", tone_style)
                 elif toggle == "tgl_target_audience":
-                    audience = st.selectbox("Audience", ["Students", "Tech Enthusiasts", "General Public"])
+                    audience = st.selectbox("Audience", [
+                        "Students", "Tech Enthusiasts", "General Public",
+                        "Children", "Young Adults", "College Students",
+                        "Professionals", "Entrepreneurs", "Retirees or Seniors",
+                        "Parents", "Educators", "Hobbyists",
+                        "Technology Enthusiasts", "Fitness and Health Enthusiasts",
+                        "Travel Enthusiasts", "Environmental Activists",
+                        "Social Justice Advocates", "Personal Finance Seekers",
+                        "Self-Improvement Seekers", "Specific Cultural or Ethnic Groups",
+                        "LGBTQ+ Community", "People with Disabilities",
+                        "People with Specific Medical Conditions", "Pet Owners",
+                        "Homeowners", "Renters", "Urban Dwellers",
+                        "Rural Residents", "Low-Income Individuals",
+                        "High-Income Individuals", "Luxury Consumers",
+                        "Bargain Hunters", "Fans of Specific Entertainment Genres"
+                    ])
                     prompt_helper.update_global_prompt_elem("audience", audience)
                 elif toggle == "tgl_persona":
                     col1, col2 = st.columns(2)

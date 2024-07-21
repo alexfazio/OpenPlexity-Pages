@@ -72,28 +72,34 @@ def get_formatted_prompt(block):
     # Include the story title in the prompt
     story_title = global_elements.get('story_title', 'Untitled Story')
 
-    prompt = f"Write a {word_count} sentence article section for the story titled '{story_title}'. "
+    prompt = f"You are tasked with writing a {word_count} sentences article section section for a story titled '{story_title}'. "
+    
     prompt += f"This section is titled '{block_elements.get('title', block)}'. "
+    
     prompt += f"Please include sources for your information as inline and aggregate citations."
 
+    prompt += f"\n\nFollow these instructions carefully:\n"
+
     if global_elements.get("tone_style"):
-        prompt += f"Use a {global_elements['tone_style']} tone. "
+        prompt += f"<tone>{global_elements['tone_style']}</tone>\n"
 
     if global_elements.get("audience"):
-        prompt += f"Target audience: {global_elements['audience']}. "
+        prompt += f"<target_audience>{global_elements['audience']}</target_audience>\n "
 
     if global_elements.get("persona_first_name") and global_elements.get("persona_last_name"):
         full_name = f"{global_elements['persona_first_name']} {global_elements['persona_last_name']}"
         prompt += f"Write in the style of {full_name}. "
 
     if global_elements.get("exemplars"):
-        prompt += f"Use this as an example of the desired tone: {global_elements['exemplars']}. "
+        prompt += f"Use this as an example of the desired tone: \n<style_example>{global_elements['exemplars']}</style_example>\n"
 
     if block_elements.get("keywords"):
-        prompt += f"\nInclude these keywords: {block_elements['keywords']}. "
+        prompt += f"\nInclude these keywords: \n<keywords>{block_elements['keywords']}</keywords>\n"
 
     if block_elements.get("notes"):
-        prompt += f"\nConsider these additional notes: {block_elements['notes']}. "
+        prompt += f"\nConsider these additional notes: \n<additional_notes>{block_elements['notes']}</additional_notes>\n "
+
+    prompt += f"\n\nRemember to focus on creating a coherent and engaging narrative within the {word_count}-sentence limit while adhering to all the specified requirements.\n"
 
     return prompt
 
