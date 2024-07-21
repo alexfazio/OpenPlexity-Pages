@@ -7,7 +7,7 @@ from rentry import export_to_rentry
 import webbrowser
 from toggle_states import toggle_states_structure
 import requests
-from serper_api import search_images
+from serper_api import search_images as serper_search_images
 from PIL import Image, UnidentifiedImageError
 from io import BytesIO
 import base64
@@ -75,24 +75,31 @@ def img_to_html(img_url):
     return img_html
 
 
-def search_and_select_image(block, image_query):
+def search_images(image_query, num_images=6):
     with st.spinner("Searching for images..."):
-        images = search_images(image_query, num_images=6)
+        images = serper_search_images(image_query, num_images=num_images)
     if images:
         image_urls = [img['imageUrl'] for img in images]
-        selected_image_index = image_select(
-            label="Select an image",
-            images=image_urls,
-            captions=[f"Image {i+1}" for i in range(len(image_urls))],
-            use_container_width=True,
-            return_value="index"
-        )
-        if selected_image_index is not None:
-            selected_image = image_urls[selected_image_index]
-            st.session_state[f"{block}_image_url"] = selected_image
-            st.success(f"Image selected for {block}.")
+        return image_urls
     else:
         st.warning("No images found for the given query. Please try a different search term.")
+        return []
+
+
+def display_image_select(block, image_urls):
+    selected_image_index = image_select(
+        label="Select an image",
+        images=image_urls,
+        captions=[f"Image {i+1}" for i in range(len(image_urls))],
+        use_container_width=True,
+        return_value="index"
+    )
+    if selected_image_index is not None:
+        selected_image_url = image_urls[selected_image_index]
+        st.session_state[f"{block}_image_url"] = selected_image_url
+        st.success(f"Image selected for {block}.")
+    else:
+        st.warning("No image selected. Please select an image to add to the article.")
 
 
 with settings_column:
@@ -385,7 +392,9 @@ with content_column:
             st.subheader(f"Image Search for {block}")
             image_query = st.chat_input(f"Enter search query for {block} image", key=f"{block}_image_query")
             if image_query:
-                search_and_select_image(block, image_query)
+                image_urls = search_images(image_query)
+                if image_urls:
+                    display_image_select(block, image_urls)
 
             if f"{block}_image_url" in st.session_state:
                 st.image(st.session_state[f"{block}_image_url"], caption=f"Image for {block}", use_column_width=True)

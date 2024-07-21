@@ -65,12 +65,12 @@ def get_formatted_prompt(block):
     block_elements = load_general_prompt_state()["blockwise_prompt_elem"].get(block, {})
 
     # Fetch word count from block_elements, which is updated by app.py
-    word_count = block_elements.get('word_count', '60')
+    word_count = block_elements.get('word_count', '60') // 15
     
     # Include the story title in the prompt
     story_title = global_elements.get('story_title', 'Untitled Story')
     
-    prompt = f"Write a {word_count} word article section for the story titled '{story_title}'. "
+    prompt = f"Write a {word_count} sentence article section for the story titled '{story_title}'. "
     prompt += f"This section is titled '{block_elements.get('title', block)}'. "
     prompt += f"Please include sources for your information as inline and aggregate citations."
 
@@ -88,10 +88,10 @@ def get_formatted_prompt(block):
         prompt += f"Use this as an example of the desired tone: {global_elements['exemplars']}. "
 
     if block_elements.get("keywords"):
-        prompt += f"Include these keywords: {block_elements['keywords']}. "
+        prompt += f"\nInclude these keywords: {block_elements['keywords']}. "
 
     if block_elements.get("notes"):
-        prompt += f"Consider these additional notes: {block_elements['notes']}. "
+        prompt += f"\nConsider these additional notes: {block_elements['notes']}. "
 
     return prompt
 
