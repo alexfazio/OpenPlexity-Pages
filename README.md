@@ -58,7 +58,11 @@ echo "pplx_api=<your-key>" > .env
 Ensure your `.env` file contains your `pplx_api` key in this format:
 
 ```plaintext
-pplx_api=<your-key>
+echo "pplx_api=<your-pplx-api-key>
+VERTEX_AI_API_KEY=<your-vertex-ai-api-key>
+GROQ_API_KEY=<your-groq-api-key>
+BASE_URL=https://rentry.co
+SERPER_API_KEY=<your-serper-api-key>" > .env
 ```
 
 ## Running the Application
