@@ -7,5 +7,5 @@ prompt_states = {
         "persona_last_name": "",
         "exemplars": ""
     },
-    "blockwise_prompt_elem": {}
+    "block_level_prompt_elem": {}
 }

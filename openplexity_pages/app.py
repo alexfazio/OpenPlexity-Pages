@@ -1,54 +1,46 @@
 import streamlit as st
 import toggles_helper
 import prompt_helper
-import time
-import random
 from rentry import export_to_rentry
 import webbrowser
 from toggle_states import toggle_states_structure
-import requests
 from serper_api import search_images as serper_search_images
-from PIL import Image, UnidentifiedImageError
-from io import BytesIO
-import base64
-from pathlib import Path
 from streamlit_image_select import image_select
-import traceback
 
 # Define story blocks
 story_blocks = ["Introduction", "Main", "Conclusion"]
 
-st.set_page_config(page_title="AI Article Generator", layout="wide")
+st.set_page_config(page_title="Openplexity Pages", layout="wide")
 
-# Custom CSS
-st.markdown("""
-    <style>
-    .block-content {
-        background-color: white;
-        border-radius: 10px;
-        padding: 20px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    .block-content h2 {
-        color: #1E1E1E;
-        border-bottom: 2px solid #4CAF50;
-        padding-bottom: 10px;
-    }
-    .block-content p {
-        color: #333;
-        line-height: 1.6;
-    }
-    .centered-image {
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-        max-width: 66.67%;  /* Matches the width of the center column */
-        height: auto;
-        padding: 20px 0;
-    }
-    </style>
-""", unsafe_allow_html=True)
+# # Custom CSS
+# st.markdown("""
+#     <style>
+#     .block-content {
+#         background-color: white;
+#         border-radius: 10px;
+#         padding: 20px;
+#         margin-bottom: 20px;
+#         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+#     }
+#     .block-content h2 {
+#         color: #1E1E1E;
+#         border-bottom: 2px solid #4CAF50;
+#         padding-bottom: 10px;
+#     }
+#     .block-content p {
+#         color: #333;
+#         line-height: 1.6;
+#     }
+#     .centered-image {
+#         display: block;
+#         margin-left: auto;
+#         margin-right: auto;
+#         max-width: 66.67%;  /* Matches the width of the center column */
+#         height: auto;
+#         padding: 20px 0;
+#     }
+#     </style>
+# """, unsafe_allow_html=True)
 
 # Place the image at the top of the page
 st.markdown('<img src="https://i.imgur.com/foi8itb.png" alt="Openplexity Pages" class="centered-image">',
@@ -91,7 +83,7 @@ def display_image_select(block, image_urls):
     selected_image_index = image_select(
         label="Select an image",
         images=image_urls,
-        captions=[f"Image {i+1}" for i in range(len(image_urls))],
+        captions=[f"Image {i + 1}" for i in range(len(image_urls))],
         use_container_width=True,
         return_value="index"
     )
@@ -248,7 +240,8 @@ with settings_column:
 
         # Warning message moved below the API key input
         st.warning(
-            "You need an API key from Serper API to use this feature. Get your API key at [https://serper.dev/](https://serper.dev/)")
+            "You need an API key from Serper API to use this feature. Get your API key at [https://serper.dev/]("
+            "https://serper.dev/)")
 
         # Add any additional Serper API settings here if needed
 
@@ -337,6 +330,7 @@ with content_column:
                             error_message = prompt_helper.get_user_friendly_error_message(e)
                             st.error(f"An error occurred while generating content: {error_message}")
                             st.button("Retry", on_click=update_content)
+
 
                 # Run the function
                 update_content()

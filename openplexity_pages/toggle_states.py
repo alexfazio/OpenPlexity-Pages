@@ -6,7 +6,7 @@ toggle_states_structure = {
         "tgl_persona",
         "tgl_exemplars"
     ],
-    "blockwise_tgl_elem": [
+    "block_level_tgl_elem": [
         "Zero",
         "One",
         "Two",
@@ -14,7 +14,7 @@ toggle_states_structure = {
         "Main",
         "Conclusion"
     ],
-    "blockwise_toggles": [
+    "block_level_toggles": [
         "tgl_keywords",
         "tgl_notes"
     ]
@@ -23,8 +23,8 @@ toggle_states_structure = {
 # Initialize the actual toggle states
 toggle_states = {
     "global_tgl_elem": {toggle: False for toggle in toggle_states_structure["global_tgl_elem"]},
-    "blockwise_tgl_elem": {
-        block: {toggle: False for toggle in toggle_states_structure["blockwise_toggles"]}
-        for block in toggle_states_structure["blockwise_tgl_elem"]
+    "block_level_tgl_elem": {
+        block: {toggle: False for toggle in toggle_states_structure["block_level_toggles"]}
+        for block in toggle_states_structure["block_level_tgl_elem"]
     }
 }

@@ -9,6 +9,8 @@ import certifi
 
 load_dotenv()
 
+
+# Custom HTTP client for making requests
 class UrllibClient:
     def __init__(self):
         self.cookie_jar = urllib.request.HTTPCookieProcessor()
@@ -16,21 +18,26 @@ class UrllibClient:
         self.opener = urllib.request.build_opener(self.cookie_jar, urllib.request.HTTPSHandler(context=context))
         urllib.request.install_opener(self.opener)
 
+    # Perform GET request
     def get(self, url, headers={}):
         request = urllib.request.Request(url, headers=headers)
         return self._request(request)
 
+    # Perform POST request
     def post(self, url, data=None, headers={}):
         postdata = urllib.parse.urlencode(data).encode()
         request = urllib.request.Request(url, postdata, headers)
         return self._request(request)
 
+    # Execute the request and process the response
     def _request(self, request):
         response = self.opener.open(request)
         response.status_code = response.getcode()
         response.data = response.read().decode('utf-8')
         return response
 
+
+# Create a new Rentry post
 def new_rentry(url, edit_code, text):
     client, cookie = UrllibClient(), SimpleCookie()
     base_url = os.getenv('BASE_URL', 'https://rentry.co')
@@ -48,6 +55,8 @@ def new_rentry(url, edit_code, text):
 
     return json.loads(client.post(f"{base_url}/api/new", payload, headers=headers).data)
 
+
+# Export content to Rentry and return the URL and edit code
 def export_to_rentry(content):
     url = ''  # Leave empty for random URL
     edit_code = ''  # Leave empty for random edit code
