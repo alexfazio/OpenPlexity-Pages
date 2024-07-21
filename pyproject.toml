@@ -20,6 +20,8 @@ watchdog = "^4.0.1"
 certifi = "^2024.7.4"
 vertexai = "^1.49.0"
 streamlit-image-select = "^0.6.0"
+st-clickable-images = "^0.0.3"
+st-click-detector = "^0.1.3"
 
 [build-system]
 requires = ["poetry-core"]

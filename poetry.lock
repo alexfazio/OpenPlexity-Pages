@@ -1730,6 +1730,34 @@ files = [
 ]
 
 [[package]]
+name = "st-click-detector"
+version = "0.1.3"
+description = "A Streamlit component to detect clicks"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "st-click-detector-0.1.3.tar.gz", hash = "sha256:984fccb56364af5c51dc01c1fbc46d55a14dcc5de6d18668a01461da5f2aca15"},
+    {file = "st_click_detector-0.1.3-py3-none-any.whl", hash = "sha256:10ab24a2167fe7c8abca3db6c9f149af2d0cadc0014091eaa8f1b045079199f2"},
+]
+
+[package.dependencies]
+streamlit = ">=0.63"
+
+[[package]]
+name = "st-clickable-images"
+version = "0.0.3"
+description = "A Streamlit component to display clickable images"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "st-clickable-images-0.0.3.tar.gz", hash = "sha256:84a1337f9364bdb8f5a3c4d85faa6695fd959f449915a616a3a3a47e37b1f7f1"},
+    {file = "st_clickable_images-0.0.3-py3-none-any.whl", hash = "sha256:c35555a660233be01f502202a210f01129f9d111033a8b1f2a4dac0ae177fcd8"},
+]
+
+[package.dependencies]
+streamlit = ">=0.63"
+
+[[package]]
 name = "streamlit"
 version = "1.36.0"
 description = "A faster way to build and share data apps"
@@ -1978,4 +2006,4 @@ watchmedo = ["PyYAML (>=3.10)"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.14"
-content-hash = "a359bb93d0e0b2095d6cadd887d1f64f56014b81c90050042b2e0a47066aab5e"
+content-hash = "2ba19c6abbd75e6d34fb0c15b33f3efd9edb9d99e794d1652b066989895c8649"

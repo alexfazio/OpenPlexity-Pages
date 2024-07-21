@@ -75,6 +75,26 @@ def img_to_html(img_url):
     return img_html
 
 
+def search_and_select_image(block, image_query):
+    with st.spinner("Searching for images..."):
+        images = search_images(image_query, num_images=6)
+    if images:
+        image_urls = [img['imageUrl'] for img in images]
+        selected_image_index = image_select(
+            label="Select an image",
+            images=image_urls,
+            captions=[f"Image {i+1}" for i in range(len(image_urls))],
+            use_container_width=True,
+            return_value="index"
+        )
+        if selected_image_index is not None:
+            selected_image = image_urls[selected_image_index]
+            st.session_state[f"{block}_image_url"] = selected_image
+            st.success(f"Image selected for {block}.")
+    else:
+        st.warning("No images found for the given query. Please try a different search term.")
+
+
 with settings_column:
     st.header("Article Settings")
 
@@ -364,33 +384,11 @@ with content_column:
         with image_tab:
             st.subheader(f"Image Search for {block}")
             image_query = st.chat_input(f"Enter search query for {block} image", key=f"{block}_image_query")
-            if image_query:  # This will trigger when the user submits the chat input
-                with st.spinner("Searching for images..."):
-                    images = search_images(image_query)
-                if images:
-                    image_urls = [img['imageUrl'] for img in images]
-                    selected_image = image_select(
-                        label="Select an image",
-                        images=image_urls,
-                        captions=[f"Image {i+1}" for i in range(len(image_urls))],
-                        use_container_width=True
-                    )
-                    if selected_image:
-                        try:
-                            st.image(selected_image, caption=f"Selected Image for {block}", use_column_width=True)
-                            st.session_state[f"{block}_image_url"] = selected_image
-                            
-                            st.success(f"Image selected for {block}. Click 'Update Content' to add it to the story.")
-                        except Exception as e:
-                            st.error(f"Error displaying selected image: {str(e)}")
-                else:
-                    st.warning("No images found for the given query. Please try a different search term.")
-            elif f"{block}_image_url" in st.session_state:
-                try:
-                    st.image(st.session_state[f"{block}_image_url"], caption=f"Image for {block}", use_column_width=True)
-                except Exception as e:
-                    st.error(f"Error displaying saved image: {str(e)}")
-                    del st.session_state[f"{block}_image_url"]
+            if image_query:
+                search_and_select_image(block, image_query)
+
+            if f"{block}_image_url" in st.session_state:
+                st.image(st.session_state[f"{block}_image_url"], caption=f"Image for {block}", use_column_width=True)
 
     # Close the content-column div
     st.markdown('</div>', unsafe_allow_html=True)
