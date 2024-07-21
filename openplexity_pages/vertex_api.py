@@ -6,6 +6,12 @@ from vertexai.preview.generative_models import GenerativeModel as PreviewGenerat
 import re
 
 def generate_stream(prompt):
+    # Print the received prompt
+    print("-" * 50)  # Separator for clarity
+    print("RECEIVED PROMPT:")
+    print(prompt)
+    print("-" * 50)  # Separator for clarity
+
     # Set the path to the new service account JSON file
     service_account_file = "./gemini-advanced-4c22cc22d8c3.json"
 
@@ -49,8 +55,10 @@ def generate_stream(prompt):
             yield chunk.text
 
     # Print the full raw response to console
+    print("-" * 50)  # Separator for clarity
     print("Raw API Response:")
     print(full_raw_response)
+    print("-" * 50)  # Separator for clarity
 
 def extract_citations(text):
     # Extract sources from the end of the text
