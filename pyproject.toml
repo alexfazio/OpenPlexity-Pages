@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "openplexity-pages"
+version = "0.0.1"
+description = "Open-Source Perplexity Pages"
+authors = [
+    "Alessandro Fazio <alessandro.fazio@me.com>",
+    "Vasile Bobeica <vasile.bobeica@addictive.dev>",
+    "Nicola Brisotto <nicolabrisotto@gmail.com>"
+]
+
+[tool.poetry.scripts]
+openplexity-pages = "main:main"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.14"
+streamlit = "^1.3.0"
+python-dotenv = "^1.0.1"
+openai = "^1.35.14"
+watchdog = "^4.0.1"
+certifi = "^2024.7.4"
+vertexai = "^1.49.0"
+streamlit-image-select = "^0.6.0"
+st-clickable-images = "^0.0.3"
+st-click-detector = "^0.1.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
