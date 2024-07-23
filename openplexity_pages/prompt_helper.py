@@ -1,5 +1,6 @@
-import vertex_api
+from experiments import vertex_api
 from prompt_states import prompt_states
+from crew import main
 
 # Default values moved here
 DEFAULT_GLOBAL_PROMPT_ELEM = {
@@ -66,58 +67,75 @@ def get_formatted_prompt(block):
     block_elements = load_general_prompt_state()["block_level_prompt_elem"].get(block, {})
 
     # Fetch word count from block_elements, which is updated by app.py
-    word_count = block_elements.get('word_count', '60') // 15 # "`// 15` converts the desired word count into an
+    word_count = block_elements.get('word_count', '60') // 15  # "`// 15` converts the desired word count into an
     # approximate sentence count, which is more easily recognized by LLMS.
 
     # Include the story title in the prompt
     story_title = global_elements.get('story_title', 'Untitled Story')
 
     prompt = f"You are tasked with writing a {word_count} sentences article section section for a story titled '{story_title}'. "
-    
-    prompt += f"This section is titled '{block_elements.get('title', block)}'. "
-    
-    prompt += f"Please include sources for your information as inline and aggregate citations."
 
-    prompt += f"\n\nFollow these instructions carefully:\n"
+    prompt += f"\n1. Review the following input variables:\n"
+
+    prompt += f"\n<story_title>{global_elements.get('story_title', 'Untitled Story')}</story_title>\n"
+
+    prompt += f"\n<section_title>{block_elements.get('title', block)}</section_title>\n"
 
     if global_elements.get("tone_style"):
-        prompt += f"<tone>{global_elements['tone_style']}</tone>\n"
+        prompt += f"\n<tone>{global_elements['tone_style']}</tone>\n"
 
     if global_elements.get("audience"):
-        prompt += f"<target_audience>{global_elements['audience']}</target_audience>\n "
+        prompt += f"\n<target_audience>{global_elements['audience']}</target_audience>\n"
 
     if global_elements.get("persona_first_name") and global_elements.get("persona_last_name"):
-        full_name = f"{global_elements['persona_first_name']} {global_elements['persona_last_name']}"
-        prompt += f"Write in the style of {full_name}. "
+        prompt += f"\n<persona>{global_elements['persona_first_name']} {global_elements['persona_last_name']}</persona>\n"
 
     if global_elements.get("exemplars"):
-        prompt += f"Use this as an example of the desired tone: \n<style_example>{global_elements['exemplars']}</style_example>\n"
+        prompt += f"\n<style_examples>{global_elements['exemplars']}</style_examples>\n"
 
     if block_elements.get("keywords"):
-        prompt += f"\nInclude these keywords: \n<keywords>{block_elements['keywords']}</keywords>\n"
+        prompt += f"\n<keywords>{block_elements['keywords']}</keywords>\n"
+
+    prompt += f"2. Write a 4-sentence article section based on the story_title and section_title provided. Ensure that each sentence contains factual information about the subject's early life."
+
+    prompt += f"3. Include sources for your information as inline citations (e.g., [1]) within the text. After the 4 sentences, provide an aggregate list of sources used."
+
+    prompt += f"4. Maintain a TONE throughout the article section. Remember that your target_audience is TARGET_AUDIENCE, so adjust your language and complexity accordingly."
+
+    prompt += f"5. Write in the style exemplified by the style_example provided. Emulate the voice and manner of expression demonstrated in this example."
+
+    prompt += f"6. Incorporate the given keywords naturally into your text. Don't force them if they don't fit the context of the early life section."
+
+    prompt += f"7. Consider the additional_notes and include relevant information if it fits within the context of the early life section."
+
+    prompt += f"8. Present your article section within <article_section> tags. Use <inline_citations> tags for the numbered citations within the text, and <aggregate_citations> tags for the list of sources at the end."
+
+    prompt += f"Remember to focus on creating engaging, factual content that meets all the specified requirements. Your goal is to inform and captivate the target audience while maintaining the appropriate tone and style."
 
     if block_elements.get("notes"):
         prompt += f"\nConsider these additional notes: \n<additional_notes>{block_elements['notes']}</additional_notes>\n "
 
-    prompt += f"\n\nRemember to focus on creating a coherent and engaging narrative within the {word_count}-sentence limit while adhering to all the specified requirements.\n"
-
     return prompt
 
 
-# New function to generate content using Vertex AI
+# New function to generate content
 def generate_api_response(block):
     prompt = get_formatted_prompt(block)
-    try:
-        full_response = ""
-        for chunk in vertex_api.generate_stream(prompt):
-            full_response += chunk
+    full_response = main(prompt)
+    return full_response
+    # try:
+    #  full_response = ""
+        # for chunk in vertex_api.generate_stream(prompt):
+        #     full_response += chunk
+        # full_response = main(prompt)
 
-        citations = vertex_api.extract_citations(full_response)
-        formatted_response = vertex_api.format_response_with_citations(full_response, citations)
-        return formatted_response
-    except Exception as e:
-        error_message = get_user_friendly_error_message(e)
-        return f"Error: {error_message}"
+        # citations = vertex_api.extract_citations(full_response)
+        # formatted_response = vertex_api.format_response_with_citations(full_response, citations)
+        # return formatted_response
+        # return full_response
+    # except Exception as e:
+    #     error_message = get_user_friendly_error_message(e)
+    #     return f"Error: {error_message}"
 
 
 def get_user_friendly_error_message(error):
