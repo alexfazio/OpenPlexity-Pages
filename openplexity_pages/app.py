@@ -8,7 +8,11 @@ from serper_api import search_images as serper_search_images
 from streamlit_image_select import image_select
 
 # Define story blocks
-story_blocks = ["Introduction", "Main", "Conclusion"]
+story_blocks = ["Block 1", "Block 2", "Block 3"]
+
+# Initialize the story blocks in session state
+if 'story_blocks' not in st.session_state:
+    st.session_state.story_blocks = ["Block 1", "Block 2", "Block 3"]
 
 st.set_page_config(page_title="Openplexity Pages", layout="wide")
 
@@ -54,6 +58,18 @@ if 'toggles_initialized' not in st.session_state:
     toggles_helper.reset_all_toggles()
     st.session_state.toggles_initialized = True
 
+def add_new_block():
+    new_block_name = f"Custom Block {len(st.session_state.story_blocks) - 2}"
+    st.session_state.story_blocks.append(new_block_name)
+
+def remove_block(block_name):
+    if block_name in st.session_state.story_blocks and len(st.session_state.story_blocks) > 3:
+        st.session_state.story_blocks.remove(block_name)
+        # Clean up any associated state
+        if f"{block_name}_response" in st.session_state:
+            del st.session_state[f"{block_name}_response"]
+        if f"{block_name}_image_url" in st.session_state:
+            del st.session_state[f"{block_name}_image_url"]
 
 def toggle_callback(toggle):
     st.session_state[toggle] = not st.session_state.get(toggle, False)
@@ -302,7 +318,7 @@ with content_column:
                                     unsafe_allow_html=True)
 
     # Story blocks
-    for block in story_blocks:
+    for block in st.session_state.story_blocks:
         output_tab, settings_tab, image_tab = st.tabs(["Output", "Settings", "Image"])
 
         with output_tab:
@@ -370,6 +386,11 @@ with content_column:
                 </div>
                 """, unsafe_allow_html=True)
 
+        if block not in story_blocks:
+            if st.button(f"Remove {block}"):
+                remove_block(block)
+                st.experimental_rerun()
+
         with settings_tab:
             # User input for word count
             word_count = st.slider("Word Count", 50, 200, prompt_helper.get_block_prompt_elem(block, "word_count", 60),
@@ -414,8 +435,12 @@ with content_column:
             if f"{block}_image_url" in st.session_state:
                 st.image(st.session_state[f"{block}_image_url"], caption=f"Image for {block}", use_column_width=True)
 
+        
     # Close the content-column div
     st.markdown('</div>', unsafe_allow_html=True)
+    if st.button("Add New Block"):
+            add_new_block()
+            st.experimental_rerun()
 
 # New outline_column
 with outline_column:
@@ -425,7 +450,7 @@ with outline_column:
 
     with outline_tab:
         st.subheader("Article Outline")
-        for block in story_blocks:
+        for block in st.session_state.story_blocks:
             block_title = prompt_helper.get_block_prompt_elem(block, 'title')
             if block_title:
                 st.markdown(f"- **{block}**: {block_title}")
@@ -436,7 +461,7 @@ with outline_column:
         if st.button("Export to Rentry"):
             # Generate full content here
             full_content = f"# {st.session_state.story_title}\n\n"
-            for block in story_blocks:
+            for block in st.session_state.story_blocks:
                 if f"{block}_response" in st.session_state:
                     block_title = prompt_helper.get_block_prompt_elem(block, 'title')
                     full_content += f"## {block_title}\n\n"
