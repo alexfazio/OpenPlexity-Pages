@@ -1,4 +1,11 @@
 ![openplexity-pages](https://github.com/user-attachments/assets/4fb6dfa2-fda9-421d-a30d-8026c300a0c1)
+---
+
+# Notice
+
+🚨 **This repository is currently not in a ready state. Full release will be available on 25th of July.** 🚨
+
+---
 
 # OpenPlexity: Open Source AI-Powered Content Creation
 
