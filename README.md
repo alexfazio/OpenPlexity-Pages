@@ -25,7 +25,8 @@
 
 ## Introducing OpenPlexity Pages
 
-OpenPlexity Pages is an open-source alternative to Perplexity Pages, designed to transform your research into visually stunning, comprehensive content. Whether you're crafting in-depth articles, detailed reports, or informative guides, OpenPlexity streamlines the process so you can focus on what matters most: sharing your knowledge with the world.
+OpenPlexity Pages serves as an open-source alternative to Perplexity Pages, with the aim of transforming your research into visually appealing, comprehensive content.
+Although the system is not capable of producing publication-ready articles, which often necessitate a substantial number of revisions, experienced editors may find it beneficial during their initial writing phase.
 
 ## What sets OpenPlexity apart?
 
