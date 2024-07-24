@@ -1,6 +1,7 @@
 from experiments import vertex_api
 from prompt_states import prompt_states
-from crew import main
+from agent_writer import main as agent_writer
+import groq_search
 
 # Default values moved here
 DEFAULT_GLOBAL_PROMPT_ELEM = {
@@ -66,6 +67,10 @@ def get_formatted_prompt(block):
     global_elements = load_general_prompt_state()["global_prompt_elem"]
     block_elements = load_general_prompt_state()["block_level_prompt_elem"].get(block, {})
 
+    groq_search_query = f"{global_elements.get('story_title', 'Untitled Story')} {block_elements.get('title', block)}"
+
+    research_results = groq_search.run_conversation(groq_search_query)
+
     # Fetch word count from block_elements, which is updated by app.py
     word_count = block_elements.get('word_count', '60') // 15  # "`// 15` converts the desired word count into an
     # approximate sentence count, which is more easily recognized by LLMS.
@@ -73,47 +78,78 @@ def get_formatted_prompt(block):
     # Include the story title in the prompt
     story_title = global_elements.get('story_title', 'Untitled Story')
 
-    prompt = f"You are tasked with writing a {word_count} sentences article section section for a story titled '{story_title}'. "
+    prompt = f"You are tasked with writing a concise article section for a larger story. Your goal is to create informative and engaging content that adheres to specific guidelines. Follow these instructions carefully: "
 
-    prompt += f"\n1. Review the following input variables:\n"
+    prompt += f"""
+    1. Review the following research results. These will serve as the factual basis for your writing:
 
-    prompt += f"\n<story_title>{global_elements.get('story_title', 'Untitled Story')}</story_title>\n"
+    <research_results>
+    {research_results}
+    </research_results>
+    """
 
-    prompt += f"\n<section_title>{block_elements.get('title', block)}</section_title>\n"
+    prompt += f"""
+    2. Take note of the story title and section title:
+    
+    <story_title>{story_title}</story_title>
+    <section_title>{block_elements.get('title', block)}</section_title>
+    """
 
+    prompt += f"""
+    3. Consider the following input variables while writing:
+    """
     if global_elements.get("tone_style"):
-        prompt += f"\n<tone>{global_elements['tone_style']}</tone>\n"
-
+        prompt += f"\n<tone>{global_elements['tone_style']}</tone>"
     if global_elements.get("audience"):
-        prompt += f"\n<target_audience>{global_elements['audience']}</target_audience>\n"
-
-    if global_elements.get("persona_first_name") and global_elements.get("persona_last_name"):
-        prompt += f"\n<persona>{global_elements['persona_first_name']} {global_elements['persona_last_name']}</persona>\n"
-
-    if global_elements.get("exemplars"):
-        prompt += f"\n<style_examples>{global_elements['exemplars']}</style_examples>\n"
-
+        prompt += f"\n<target_audience>{global_elements['audience']}</target_audience>"
     if block_elements.get("keywords"):
         prompt += f"\n<keywords>{block_elements['keywords']}</keywords>\n"
 
-    prompt += f"2. Write a 4-sentence article section based on the story_title and section_title provided. Ensure that each sentence contains factual information about the subject's early life."
+    prompt += f"""
+    4. Write a {word_count}-sentence article section based on the story title and section title provided. Ensure that each sentence contains factual information about the section topic.
+    """
 
-    prompt += f"3. Include sources for your information as inline citations (e.g., [1]) within the text. After the 4 sentences, provide an aggregate list of sources used."
+    prompt += f"""
+    5. Include sources for your information as inline citations (e.g., [1]) within the text. After the {word_count} sentences, provide an aggregate list of sources used.
+    """
 
-    prompt += f"4. Maintain a TONE throughout the article section. Remember that your target_audience is TARGET_AUDIENCE, so adjust your language and complexity accordingly."
+    prompt += f"""
+    6. Maintain the specified tone throughout the article section. Remember your target audience and adjust your language and complexity accordingly.
+    """
 
-    prompt += f"5. Write in the style exemplified by the style_example provided. Emulate the voice and manner of expression demonstrated in this example."
+    prompt += f"""
+    7. Write in the style exemplified by the style examples provided. Emulate the voice and manner of expression demonstrated in these examples.
+    """
 
-    prompt += f"6. Incorporate the given keywords naturally into your text. Don't force them if they don't fit the context of the early life section."
+    prompt += f"""
+    8. Incorporate the given keywords naturally into your text. Don't force them if they don't fit the context of the section.
+    """
 
-    prompt += f"7. Consider the additional_notes and include relevant information if it fits within the context of the early life section."
+    prompt += f"""
+    9. Present your article section within <article_section> tags. Use <inline_citations> tags for the numbered citations within the text, and <aggregate_citations> tags for the list of sources at the end.
+    """
 
-    prompt += f"8. Present your article section within <article_section> tags. Use <inline_citations> tags for the numbered citations within the text, and <aggregate_citations> tags for the list of sources at the end."
-
-    prompt += f"Remember to focus on creating engaging, factual content that meets all the specified requirements. Your goal is to inform and captivate the target audience while maintaining the appropriate tone and style."
+    prompt += f"""
+    10. Focus on creating engaging, factual content that meets all the specified requirements. Your goal is to inform and captivate the target audience while maintaining the appropriate tone and style.
+    """
 
     if block_elements.get("notes"):
-        prompt += f"\nConsider these additional notes: \n<additional_notes>{block_elements['notes']}</additional_notes>\n "
+        prompt += f"\n 11. Consider these additional_notes and include relevant information if it fits within the context of the '{block_elements.get('title', block)}' section."
+
+
+    prompt += f"""
+    \nPresent your article section using the following format:
+    
+    <article_section>
+    Write your {word_count} sentences here, including <inline_citations> tags for the numbered citations within the text.
+    </article_section>
+    
+    <aggregate_citations>
+    List your sources here, numbered to match the inline citations.
+    </aggregate_citations>
+
+    Remember to ground your writing in the provided research results, adhere to the specified tone and style, and create content that is both informative and engaging for the target audience.
+    """
 
     return prompt
 
@@ -121,22 +157,8 @@ def get_formatted_prompt(block):
 # New function to generate content
 def generate_api_response(block):
     prompt = get_formatted_prompt(block)
-    full_response = main(prompt)
+    full_response = agent_writer(prompt)
     return full_response
-    # try:
-    #  full_response = ""
-        # for chunk in vertex_api.generate_stream(prompt):
-        #     full_response += chunk
-        # full_response = main(prompt)
-
-        # citations = vertex_api.extract_citations(full_response)
-        # formatted_response = vertex_api.format_response_with_citations(full_response, citations)
-        # return formatted_response
-        # return full_response
-    # except Exception as e:
-    #     error_message = get_user_friendly_error_message(e)
-    #     return f"Error: {error_message}"
-
 
 def get_user_friendly_error_message(error):
     if isinstance(error, ValueError) and "blocked by the safety filters" in str(error):

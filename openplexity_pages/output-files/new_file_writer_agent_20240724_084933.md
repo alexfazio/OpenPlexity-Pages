@@ -1,1 +1,0 @@
-Agent stopped due to iteration limit or time limit.
