@@ -105,9 +105,9 @@ With OpenPlexity, you have the freedom to host your own instance, contribute to 
 
 **Let's see what we can create together.**
 
-## TODOs
-
-- Make better
-- Fix image feature
-- Add export modalities
-- Local LLM support
+## Roadmap
+- [x] Make better
+- [x] Fix image feature
+- [x] Add more document export modalities
+- [x] Local LLM support
+- [x] Settings for LLMs
