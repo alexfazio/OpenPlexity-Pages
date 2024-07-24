@@ -1,8 +1,21 @@
-# OpenPlexity Pages: Open Source AI-Powered Content Creation
-
 <p align="center">
   <img src="images/openplexity-pages-readme-cover.png" alt="Alt text for the image">
 </p>
+
+<p align="center">
+	<h1 align="center"><b>Openplexity Pages</b></h1>
+<p align="center">
+    Open-Source Perplexity Pages
+    <br />
+    <br />
+    <a href="https://x.com/alxfazio">@alxfazio</a>
+    ·
+    <a href="https://x.com/mutatedmindcom">@mutatedmindcom</a>
+    ·
+    <a href="https://x.com/breezeight">@breezeight</a>
+  </p>
+</p>
+
 
 # Notice
 
