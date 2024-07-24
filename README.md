@@ -119,3 +119,6 @@ With OpenPlexity Pages, you have the freedom to host your own instance, contribu
 - [x] Add more document export modalities
 - [x] Local LLM support
 - [x] Settings for LLMs
+
+## Acknowledgement
+We are very grateful to [MutatedMinds](https://mutatedminds.) for leading the UI development.
