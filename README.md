@@ -104,3 +104,9 @@ While Perplexity Pages offers a polished, hosted solution, OpenPlexity brings th
 With OpenPlexity, you have the freedom to host your own instance, contribute to its development, and create content that educates, inspires, and engages your audience—all while maintaining full control over your data and the tool itself.
 
 **Let's see what we can create together.**
+
+## TODOs
+
+- Make better
+- Fix image feature
+- Add export modalities
