@@ -97,6 +97,12 @@ And that's it! Your application should now be up and running. Enjoy exploring Op
 
 ---
 
+## Architecture
+
+<p align="center">
+  <img src="images/Openplexit-Pages-Backend.png" alt="Alt text for the image">
+</p>
+
 ## Contribute
 
 OpenPlexity Pages thrives on community contributions. Whether you're fixing bugs, adding features, or improving docs, we welcome your input! Check out our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
