@@ -1,5 +1,8 @@
-![openplexity-pages](https://github.com/user-attachments/assets/4fb6dfa2-fda9-421d-a30d-8026c300a0c1)
----
+# OpenPlexity Pages: Open Source AI-Powered Content Creation
+
+<p align="center">
+  <img src="images/openplexity-pages-readme-cover.png" alt="Alt text for the image">
+</p>
 
 # Notice
 
