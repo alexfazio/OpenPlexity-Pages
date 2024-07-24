@@ -62,15 +62,7 @@ poetry install
 Next, you need to create a `.env` file in the root directory of the project. This file will store your `pplx_api` key. Use the following command to create and add your API key to the `.env` file:
 
 ```bash
-echo "pplx_api=<your-key>" > .env
-```
-
-Ensure your `.env` file contains your `pplx_api` key in this format:
-
-```plaintext
-echo "pplx_api=<your-pplx-api-key>
-VERTEX_AI_API_KEY=<your-vertex-ai-api-key>
-GROQ_API_KEY=<your-groq-api-key>
+$ echo "GROQ_API_KEY=<your-groq-api-key>
 BASE_URL=https://rentry.co
 SERPER_API_KEY=<your-serper-api-key>" > .env
 ```
