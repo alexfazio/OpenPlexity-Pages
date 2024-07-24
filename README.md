@@ -26,7 +26,7 @@ OpenPlexity is an open-source alternative to Perplexity Pages, designed to trans
 
 ## Features That Matter
 
-- **Local LLM Support**: Harness the power of Llama3 and Mixtral using Ollama for content generation.
+- **Local LLM Support (Coming soon!)**: Harness the power of Llama3 and Mixtral using Ollama for content generation.
 - **Seamless Creation**: Transform your research into well-structured, beautifully formatted articles with ease.
 - **Always Current**: Unlike static embedding-based tools, OpenPlexity uses real-time search results, ensuring your content is up-to-date.
 
@@ -110,3 +110,4 @@ With OpenPlexity, you have the freedom to host your own instance, contribute to 
 - Make better
 - Fix image feature
 - Add export modalities
+- Local LLM support
