@@ -10,16 +10,14 @@
 
 ---
 
-# OpenPlexity: Open Source AI-Powered Content Creation
+## Introducing OpenPlexity Pages
 
-## Introducing OpenPlexity
-
-OpenPlexity is an open-source alternative to Perplexity Pages, designed to transform your research into visually stunning, comprehensive content. Whether you're crafting in-depth articles, detailed reports, or informative guides, OpenPlexity streamlines the process so you can focus on what matters most: sharing your knowledge with the world.
+OpenPlexity Pages is an open-source alternative to Perplexity Pages, designed to transform your research into visually stunning, comprehensive content. Whether you're crafting in-depth articles, detailed reports, or informative guides, OpenPlexity streamlines the process so you can focus on what matters most: sharing your knowledge with the world.
 
 ## What sets OpenPlexity apart?
 
-- **Open Source**: Unlike Perplexity Pages, OpenPlexity is fully open source, allowing for community contributions and customizations.
-- **Privacy-Focused**: Your data stays with you. OpenPlexity runs locally, ensuring your research and content remain private.
+- **Open Source**: Unlike Perplexity Pages, OpenPlexity Pages is fully open source, allowing for community contributions and customizations.
+- **Privacy-Focused**: Your data stays with you. OpenPlexity Pages runs locally, ensuring your research and content remain private.
 - **Customizable**: Tailor the tone of your content to resonate with your target audience, from general readers to subject matter experts.
 - **Adaptable**: Easily modify the structure of your articles—add, rearrange, or remove sections to best suit your material.
 - **Visual**: Enhance your articles with AI-generated visuals or integrate your own images.
@@ -28,11 +26,11 @@ OpenPlexity is an open-source alternative to Perplexity Pages, designed to trans
 
 - **Local LLM Support (Coming soon!)**: Harness the power of Llama3 and Mixtral using Ollama for content generation.
 - **Seamless Creation**: Transform your research into well-structured, beautifully formatted articles with ease.
-- **Always Current**: Unlike static embedding-based tools, OpenPlexity uses real-time search results, ensuring your content is up-to-date.
+- **Always Current**: Unlike static embedding-based tools, OpenPlexity Pages uses real-time search results, ensuring your content is up-to-date.
 
 ## A Tool for Everyone
 
-OpenPlexity empowers creators in any field to share knowledge:
+OpenPlexity Pages empowers creators in any field to share knowledge:
 
 - **Educators**: Develop comprehensive study guides, breaking down complex topics into digestible content.
 - **Researchers**: Create detailed reports on your findings, making your work more accessible.
@@ -41,7 +39,7 @@ OpenPlexity empowers creators in any field to share knowledge:
 
 # Getting Started
 
-Follow these instructions to set up and run OpenPlexity using Poetry.
+Follow these instructions to set up and run OpenPlexity Pages using Poetry.
 
 ## Installation
 
@@ -75,25 +73,25 @@ To run the application, use the following command:
 poetry run streamlit run openplexity_pages/app.py
 ```
 
-And that's it! Your application should now be up and running. Enjoy exploring OpenPlexity!
+And that's it! Your application should now be up and running. Enjoy exploring OpenPlexity Pages!
 
 ---
 
 ## Contribute
 
-OpenPlexity thrives on community contributions. Whether you're fixing bugs, adding features, or improving docs, we welcome your input! Check out our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+OpenPlexity Pages thrives on community contributions. Whether you're fixing bugs, adding features, or improving docs, we welcome your input! Check out our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## Support the Project
 
-Love OpenPlexity? Here's how you can help:
+Love OpenPlexity Pages? Here's how you can help:
 
 - Star us on GitHub
 
 ## The Power of Open Source
 
-While Perplexity Pages offers a polished, hosted solution, OpenPlexity brings the power of AI-driven content creation to the open-source community. We believe in the potential of collaborative development and the importance of data privacy.
+While Perplexity Pages offers a polished, hosted solution, OpenPlexity Pages brings the power of AI-driven content creation to the open-source community. We believe in the potential of collaborative development and the importance of data privacy.
 
-With OpenPlexity, you have the freedom to host your own instance, contribute to its development, and create content that educates, inspires, and engages your audience—all while maintaining full control over your data and the tool itself.
+With OpenPlexity Pages, you have the freedom to host your own instance, contribute to its development, and create content that educates, inspires, and engages your audience—all while maintaining full control over your data and the tool itself.
 
 **Let's see what we can create together.**
 
