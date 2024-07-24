@@ -9,6 +9,11 @@ from streamlit_image_select import image_select
 import re
 import html
 import markdown
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Define story blocks
 story_blocks = ["Introduction", "Main", "Conclusion"]
@@ -93,10 +98,6 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
-
-# Place the image at the top of the page
-# st.markdown('<img src="https://i.imgur.com/foi8itb.png" alt="Openplexity Pages" class="centered-image">',
-#             unsafe_allow_html=True)
 
 st.markdown('<img src="https://i.imgur.com/WaD65y8.png" alt="Openplexity Pages" class="centered-image">',
            unsafe_allow_html=True)
@@ -189,8 +190,8 @@ def display_image_select(block, image_urls):
 with settings_column:
     st.header("Article Settings")
 
-    settings_tab, ai_api_settings_tab, image_search_api_tab = st.tabs(
-        ["Settings", "AI API Settings", "Image Search API"])
+    settings_tab, ai_api_settings_tab = st.tabs(
+        ["Settings", "AI API Settings"])
 
     with settings_tab:
         # Global toggles
@@ -205,28 +206,47 @@ with settings_column:
                            on_change=toggle_callback, args=(toggle,)):
                 if toggle == "tgl_style":
                     tone_style = st.selectbox("Tone", [
-                        "Professional", "Friendly", "Authoritative", "Sarcastic", "Funny",
-                        "Concise", "Clear", "Engaging", "Informative", "Persuasive",
-                        "Assertive", "Courteous", "Empathetic", "Emotive", "Compelling",
-                        "Conversational"
+                        "Assertive", "Authoritative", "Clear", "Compelling", "Concise",
+                        "Conversational", "Courteous", "Empathetic", "Emotive", "Engaging",
+                        "Friendly", "Funny", "Informative", "Persuasive", "Professional",
+                        "Sarcastic"
                     ])
                     prompt_helper.update_global_prompt_elem("tone_style", tone_style)
                 elif toggle == "tgl_target_audience":
                     audience = st.selectbox("Audience", [
-                        "Students", "Tech Enthusiasts", "General Public",
-                        "Children", "Young Adults", "College Students",
-                        "Professionals", "Entrepreneurs", "Retirees or Seniors",
-                        "Parents", "Educators", "Hobbyists",
-                        "Technology Enthusiasts", "Fitness and Health Enthusiasts",
-                        "Travel Enthusiasts", "Environmental Activists",
-                        "Social Justice Advocates", "Personal Finance Seekers",
-                        "Self-Improvement Seekers", "Specific Cultural or Ethnic Groups",
-                        "LGBTQ+ Community", "People with Disabilities",
-                        "People with Specific Medical Conditions", "Pet Owners",
-                        "Homeowners", "Renters", "Urban Dwellers",
-                        "Rural Residents", "Low-Income Individuals",
-                        "High-Income Individuals", "Luxury Consumers",
-                        "Bargain Hunters", "Fans of Specific Entertainment Genres"
+                        "Bargain Hunters",
+                        "Children",
+                        "College Students", 
+                        "Educators",
+                        "Entrepreneurs",
+                        "Environmental Activists",
+                        "Fans of Specific Entertainment Genres",
+                        "Fitness and Health Enthusiasts",
+                        "General Public",
+                        "High-Income Individuals",
+                        "Hobbyists",
+                        "Homeowners",
+                        "LGBTQ+ Community",
+                        "Low-Income Individuals", 
+                        "Luxury Consumers",
+                        "Parents",
+                        "People with Disabilities",
+                        "People with Specific Medical Conditions", 
+                        "Personal Finance Seekers",
+                        "Pet Owners",
+                        "Professionals",
+                        "Renters",
+                        "Retirees or Seniors",
+                        "Rural Residents",
+                        "Self-Improvement Seekers",
+                        "Social Justice Advocates",
+                        "Specific Cultural or Ethnic Groups",
+                        "Students",
+                        "Tech Enthusiasts", 
+                        "Technology Enthusiasts",
+                        "Travel Enthusiasts",
+                        "Urban Dwellers", 
+                        "Young Adults"
                     ])
                     prompt_helper.update_global_prompt_elem("audience", audience)
                 elif toggle == "tgl_persona":
@@ -246,115 +266,53 @@ with settings_column:
     with ai_api_settings_tab:
         st.subheader("AI API Settings")
 
-        # API provider dropdown
-        api_provider = st.selectbox(
-            "API Provider",
-            ["Perplexity", "Google"],
-            key="api_provider"
-        )
-
         # Model selection dropdown
-        if api_provider == "Perplexity":
-            model = st.selectbox(
-                "Model",
-                ["llama-3-sonar-large-32k-online", "llama-3-sonar-small-32k-online"],
-                key="perplexity_model"
-            )
-            # API key input for Perplexity
-            api_key = st.text_input(
-                "API Key",
-                type="password",
-                key="perplexity_api_key"
-            )
-        elif api_provider == "Google":
-            model = st.selectbox(
-                "Model",
-                ["gemini-1.5-flash-001", "gemini-1.5-pro-001", "gemini-1.0-pro-002", "gemini-1.0-pro-001"],
-                key="google_model"
-            )
-            # Service account file upload for Google
-            service_account_file = st.file_uploader(
-                "Upload Service Account JSON File",
-                type=["json"],
-                key="google_service_account_file"
-            )
-
-        # Model temperature slider
-        temperature = st.slider(
-            "Temperature",
-            min_value=0.0,
-            max_value=2.0,
-            value=0.7,
-            step=0.1,
-            key="model_temperature"
+        model = st.selectbox(
+            "Model",
+            [
+                "llama-3-sonar-large-32k-online",
+                "llama-3-sonar-small-32k-online",
+                "llama-3.1-405b-reasoning",
+                "llama-3.1-70b-versatile", 
+                "llama-3.1-8b-instant",
+                "llama3-groq-70b-8192-tool-use-preview",
+                "llama3-groq-8b-8192-tool-use-preview",
+                "llama3-70b-8192",
+                "llama3-8b-8192",
+                "mixtral-8x7b-32768",
+                "gemma-7b-it",
+                "gemma2-9b-it"
+            ],
+            key="groq_model"
         )
 
-        # Top K slider
-        top_k = st.slider(
-            "Top K",
-            min_value=1,
-            max_value=100,
-            value=50,
-            step=1,
-            key="top_k"
+        # API key input for Groq
+        groq_api_key = st.text_input(
+            "Groq API Key",
+            type="password",
+            key="groq_api_key",
+            value=os.getenv("GROQ_API_KEY", "")  # Display the stored value or an empty string
         )
 
-        # Top P slider
-        top_p = st.slider(
-            "Top P",
-            min_value=0.0,
-            max_value=1.0,
-            value=1.0,
-            step=0.01,
-            key="top_p"
+        # Update the .env file with the entered Groq API key
+        if groq_api_key:
+            os.environ["GROQ_API_KEY"] = groq_api_key
+            with open(".env", "a") as f:
+                f.write(f"GROQ_API_KEY={groq_api_key}\n")
+
+        # API key input for Serper
+        serper_api_key = st.text_input(
+            "Serper API Key",
+            type="password",
+            key="serper_api_key",
+            value=os.getenv("SERPER_API_KEY", "")  # Display the stored value or an empty string
         )
 
-        # Frequency penalty slider
-        frequency_penalty = st.slider(
-            "Frequency Penalty",
-            min_value=-2.0,
-            max_value=2.0,
-            value=0.0,
-            step=0.1,
-            key="frequency_penalty"
-        )
-
-        # Presence penalty slider
-        presence_penalty = st.slider(
-            "Presence Penalty",
-            min_value=-2.0,
-            max_value=2.0,
-            value=0.0,
-            step=0.1,
-            key="presence_penalty"
-        )
-
-        # Max Tokens dropdown
-        max_tokens_options = {
-            "256": 256,
-            "512": 512,
-            "1K": 1024,
-            "2K": 2048,
-            "4K": 4096,
-            "8K": 8192
-        }
-        max_tokens = st.selectbox(
-            "Max Tokens",
-            options=list(max_tokens_options.keys()),
-            format_func=lambda x: x,
-            key="max_tokens"
-        )
-        max_tokens_value = max_tokens_options[max_tokens]
-
-    with image_search_api_tab:
-        st.subheader("Serper API Settings")
-
-        # Warning message moved below the API key input
-        st.warning(
-            "You need an API key from Serper API to use this feature. Get your API key at [https://serper.dev/]("
-            "https://serper.dev/)")
-
-        # Add any additional Serper API settings here if needed
+        # Update the .env file with the entered Serper API key
+        if serper_api_key:
+            os.environ["SERPER_API_KEY"] = serper_api_key
+            with open(".env", "a") as f:
+                f.write(f"SERPER_API_KEY={serper_api_key}\n")
 
 # Content column
 with content_column:
