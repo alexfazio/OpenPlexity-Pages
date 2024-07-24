@@ -144,17 +144,3 @@ def run_conversation(user_prompt):
             return response_message.content
     except Exception as e:
         return f"An error occurred: {str(e)}"
-
-# # Example usage
-# user_prompt = "The early life of Mark Zuckerberg"
-# print(run_conversation(user_prompt))
-#
-# if __name__ == "__main__":
-#     user_prompt = input("Enter your search query: ")
-#     result = run_conversation(user_prompt)
-#     print("\nSearch Results:")
-#     print(result)
-#
-#     # Add this line to print the full conversation for debugging
-#     print("\nFull conversation:")
-#     print(json.dumps(messages, indent=2))

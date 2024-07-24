@@ -67,9 +67,14 @@ def get_formatted_prompt(block):
     global_elements = load_general_prompt_state()["global_prompt_elem"]
     block_elements = load_general_prompt_state()["block_level_prompt_elem"].get(block, {})
 
-    groq_search_query = f"{global_elements.get('story_title', 'Untitled Story')} {block_elements.get('title', block)}"
+    story_title = global_elements.get('story_title', '')
+    block_title = block_elements.get('title', block)
 
-    research_results = groq_search.run_conversation(groq_search_query)
+    if story_title and block_title:
+        groq_search_query = f"{story_title} {block_title}"
+        research_results = groq_search.run_conversation(groq_search_query)
+    else:
+        research_results = "<research_results>"
 
     # Fetch word count from block_elements, which is updated by app.py
     word_count = block_elements.get('word_count', '60') // 15  # "`// 15` converts the desired word count into an
@@ -105,32 +110,25 @@ def get_formatted_prompt(block):
     if block_elements.get("keywords"):
         prompt += f"\n<keywords>{block_elements['keywords']}</keywords>\n"
 
-    prompt += f"""
-    4. Write a {word_count}-sentence article section based on the story title and section title provided. Ensure that each sentence contains factual information about the section topic.
+    prompt += f"""\n4. Write a {word_count}-sentence article section based on the story title and section title provided. Ensure that each sentence contains factual information about the section topic.
     """
 
-    prompt += f"""
-    5. Include sources for your information as inline citations (e.g., [1]) within the text. After the {word_count} sentences, provide an aggregate list of sources used.
+    prompt += f"""5. Include sources for your information as inline citations (e.g., [1]) within the text. After the {word_count} sentences, provide an aggregate list of sources used.
     """
 
-    prompt += f"""
-    6. Maintain the specified tone throughout the article section. Remember your target audience and adjust your language and complexity accordingly.
+    prompt += f"""6. Maintain the specified tone throughout the article section. Remember your target audience and adjust your language and complexity accordingly.
     """
 
-    prompt += f"""
-    7. Write in the style exemplified by the style examples provided. Emulate the voice and manner of expression demonstrated in these examples.
+    prompt += f"""7. Write in the style exemplified by the style examples provided. Emulate the voice and manner of expression demonstrated in these examples.
     """
 
-    prompt += f"""
-    8. Incorporate the given keywords naturally into your text. Don't force them if they don't fit the context of the section.
+    prompt += f"""8. Incorporate the given keywords naturally into your text. Don't force them if they don't fit the context of the section.
     """
 
-    prompt += f"""
-    9. Present your article section within <article_section> tags. Use <inline_citations> tags for the numbered citations within the text, and <aggregate_citations> tags for the list of sources at the end.
+    prompt += f"""9. Present your article section within <article_section> tags. Use <inline_citations> tags for the numbered citations within the text, and <aggregate_citations> tags for the list of sources at the end.
     """
 
-    prompt += f"""
-    10. Focus on creating engaging, factual content that meets all the specified requirements. Your goal is to inform and captivate the target audience while maintaining the appropriate tone and style.
+    prompt += f"""10. Focus on creating engaging, factual content that meets all the specified requirements. Your goal is to inform and captivate the target audience while maintaining the appropriate tone and style.
     """
 
     if block_elements.get("notes"):

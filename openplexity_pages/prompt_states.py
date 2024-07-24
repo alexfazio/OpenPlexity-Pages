@@ -1,6 +1,6 @@
 prompt_states = {
     "global_prompt_elem": {
-        "story_title": "The Future of AI",
+        "story_title": "",
         "tone_style": "",
         "audience": "",
         "persona_first_name": "",
