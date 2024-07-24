@@ -32,6 +32,7 @@ langchain-groq = "^0.1.6"
 crewai-tools = "^0.4.26"
 groq = "^0.9.0"
 langchain = "^0.2.11"
+markdown = "^3.6"
 
 [build-system]
 requires = ["poetry-core"]

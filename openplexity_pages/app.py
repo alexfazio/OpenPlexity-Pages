@@ -8,6 +8,7 @@ from serper_api import search_images as serper_search_images
 from streamlit_image_select import image_select
 import re
 import html
+import markdown
 
 # Define story blocks
 story_blocks = ["Introduction", "Main", "Conclusion"]
@@ -21,25 +22,31 @@ st.set_page_config(page_title="Openplexity Pages", layout="wide")
 # Custom CSS
 st.markdown("""
     <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+            
     .block-content {
         background-color: white;
         border-radius: 10px;
-        padding: 20px;
         margin-bottom: 20px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
     .block-content h2 {
         color: #1E1E1E;
-        border-bottom: 2px solid #4CAF50;
         padding-bottom: 10px;
+        font-size: 28px;
+        font-family: "Montserrat";
     }
     .block-content h3 {
         color: #333;
         margin-top: 20px;
+        font-size: 24px;
+        font-family: "Montserrat"
     }
     .block-content p {
         color: #333;
         line-height: 1.6;
+        font-size: 20px;
+        font-family: "Lato";
     }
     .block-image {
         max-width: 100%;
@@ -59,6 +66,7 @@ st.markdown("""
         border-left: 5px solid #ccc;
         margin: 1.5em 10px;
         padding: 0.5em 10px;
+        color: #666;
         quotes: "\\201C""\\201D""\\2018""\\2019";
     }
     blockquote:before {
@@ -96,60 +104,16 @@ if 'toggles_initialized' not in st.session_state:
     st.session_state.toggles_initialized = True
 
 def format_markdown_content(block, content):
-    # Extract content from article_section tags
-    match = re.search(r'<article_section>(.*?)</article_section>', content, re.DOTALL)
-    if match:
-        content = match.group(1)
-    else:
-        # If no article_section tags, use the whole content
-        content = content
+    # Convert Markdown to HTML
+    html_content = markdown.markdown(content)
     
-    # Add block title
-    formatted_content = f"<h2>{html.escape(prompt_helper.get_block_prompt_elem(block, 'title'))}</h2>\n\n"
+    # Handle custom tags
+    html_content = re.sub(r'<aggregate_citations>(.*?)</aggregate_citations>', 
+                          r'<div class="citations">\1</div>', 
+                          html_content, 
+                          flags=re.DOTALL)
     
-    # Add image if exists
-    if f"{block}_image_url" in st.session_state:
-        image_url = html.escape(st.session_state[f"{block}_image_url"])
-        formatted_content += f'<figure><img src="{image_url}" alt="Image for {block}" class="block-image"><figcaption>Image for {block}</figcaption></figure>\n\n'
-    
-    # Process content
-    lines = content.split('\n')
-    in_references = False
-    references = []
-    
-    for line in lines:
-        line = line.strip()
-        if line.lower().startswith("# "):
-            # Main title
-            formatted_content += f"<h1>{html.escape(line[2:])}</h1>\n\n"
-        elif line.lower().startswith("## "):
-            # Subtitle
-            formatted_content += f"<h2>{html.escape(line[3:])}</h2>\n\n"
-        elif line.lower().startswith("### "):
-            # Sub-subtitle
-            formatted_content += f"<h3>{html.escape(line[4:])}</h3>\n\n"
-        elif line.lower() == "references" or line.lower().startswith("aggregate citations"):
-            in_references = True
-            formatted_content += "<h3>References</h3>\n<ol>\n"
-        elif in_references and line and not line.startswith("*"):
-            # End of references
-            in_references = False
-            formatted_content += "</ol>\n"
-        elif in_references:
-            # Reference item
-            ref = re.sub(r'^\*\s*', '', line)  # Remove the bullet point
-            formatted_content += f"<li>{html.escape(ref)}</li>\n"
-        else:
-            # Regular paragraph
-            if line:
-                # Convert inline citations to superscript
-                line = re.sub(r'\[(\d+)\]', r'<sup>[\1]</sup>', line)
-                formatted_content += f"<p>{line}</p>\n\n"
-    
-    if in_references:
-        formatted_content += "</ol>\n"
-    
-    return formatted_content
+    return html_content
 
 def add_new_block():
     new_block_name = f"Custom Block {len(st.session_state.story_blocks) - 2}"
