@@ -16,11 +16,6 @@
   </p>
 </p>
 
-
-# Notice
-
-🚨 **This repository is currently not in a ready state. Full release will be available on 25th of July.** 🚨
-
 ---
 
 ## Introducing OpenPlexity Pages
