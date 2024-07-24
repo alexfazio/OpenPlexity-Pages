@@ -6,6 +6,8 @@ import webbrowser
 from toggle_states import toggle_states_structure
 from serper_api import search_images as serper_search_images
 from streamlit_image_select import image_select
+import re
+import html
 
 # Define story blocks
 story_blocks = ["Introduction", "Main", "Conclusion"]
@@ -31,9 +33,44 @@ st.markdown("""
         border-bottom: 2px solid #4CAF50;
         padding-bottom: 10px;
     }
+    .block-content h3 {
+        color: #333;
+        margin-top: 20px;
+    }
     .block-content p {
         color: #333;
         line-height: 1.6;
+    }
+    .block-image {
+        max-width: 100%;
+        height: auto;
+        margin: 20px 0;
+    }
+    figure {
+        margin: 0;
+        text-align: center;
+    }
+    figcaption {
+        font-style: italic;
+        color: #666;
+    }
+    blockquote {
+        background-color: #f9f9f9;
+        border-left: 5px solid #ccc;
+        margin: 1.5em 10px;
+        padding: 0.5em 10px;
+        quotes: "\\201C""\\201D""\\2018""\\2019";
+    }
+    blockquote:before {
+        color: #ccc;
+        content: open-quote;
+        font-size: 4em;
+        line-height: 0.1em;
+        margin-right: 0.25em;
+        vertical-align: -0.4em;
+    }
+    sup {
+        color: #0066cc;
     }
     .centered-image {
         display: block;
@@ -57,6 +94,62 @@ settings_column, content_column, outline_column = st.columns([1, 2, 1])
 if 'toggles_initialized' not in st.session_state:
     toggles_helper.reset_all_toggles()
     st.session_state.toggles_initialized = True
+
+def format_markdown_content(block, content):
+    # Extract content from article_section tags
+    match = re.search(r'<article_section>(.*?)</article_section>', content, re.DOTALL)
+    if match:
+        content = match.group(1)
+    else:
+        # If no article_section tags, use the whole content
+        content = content
+    
+    # Add block title
+    formatted_content = f"<h2>{html.escape(prompt_helper.get_block_prompt_elem(block, 'title'))}</h2>\n\n"
+    
+    # Add image if exists
+    if f"{block}_image_url" in st.session_state:
+        image_url = html.escape(st.session_state[f"{block}_image_url"])
+        formatted_content += f'<figure><img src="{image_url}" alt="Image for {block}" class="block-image"><figcaption>Image for {block}</figcaption></figure>\n\n'
+    
+    # Process content
+    lines = content.split('\n')
+    in_references = False
+    references = []
+    
+    for line in lines:
+        line = line.strip()
+        if line.lower().startswith("# "):
+            # Main title
+            formatted_content += f"<h1>{html.escape(line[2:])}</h1>\n\n"
+        elif line.lower().startswith("## "):
+            # Subtitle
+            formatted_content += f"<h2>{html.escape(line[3:])}</h2>\n\n"
+        elif line.lower().startswith("### "):
+            # Sub-subtitle
+            formatted_content += f"<h3>{html.escape(line[4:])}</h3>\n\n"
+        elif line.lower() == "references" or line.lower().startswith("aggregate citations"):
+            in_references = True
+            formatted_content += "<h3>References</h3>\n<ol>\n"
+        elif in_references and line and not line.startswith("*"):
+            # End of references
+            in_references = False
+            formatted_content += "</ol>\n"
+        elif in_references:
+            # Reference item
+            ref = re.sub(r'^\*\s*', '', line)  # Remove the bullet point
+            formatted_content += f"<li>{html.escape(ref)}</li>\n"
+        else:
+            # Regular paragraph
+            if line:
+                # Convert inline citations to superscript
+                line = re.sub(r'\[(\d+)\]', r'<sup>[\1]</sup>', line)
+                formatted_content += f"<p>{line}</p>\n\n"
+    
+    if in_references:
+        formatted_content += "</ol>\n"
+    
+    return formatted_content
 
 def add_new_block():
     new_block_name = f"Custom Block {len(st.session_state.story_blocks) - 2}"
@@ -343,32 +436,26 @@ with content_column:
                     with st.spinner(f"Generating {block} content..."):
                         try:
                             content_generator = prompt_helper.generate_api_response(block)
-
-                            # Create a placeholder for the streamed content
                             content_placeholder = output_placeholder.empty()
-
-                            formatted_response = ""
+                            
+                            # Accumulate the entire response
+                            full_response = ""
                             for chunk in content_generator:
-                                formatted_response += chunk
-
-                                # Add the image at the top of the content if it exists
-                                if f"{block}_image_url" in st.session_state:
-                                    image_html = img_to_html(st.session_state[f"{block}_image_url"])
-                                    display_content = image_html + formatted_response
-                                else:
-                                    display_content = formatted_response
-
-                                content_placeholder.markdown(f"""
-                                    {display_content}
-                                """, unsafe_allow_html=False)
-
-                            # Store the complete response including the image in session state
-                            if f"{block}_image_url" in st.session_state:
-                                image_html = img_to_html(st.session_state[f"{block}_image_url"])
-                                st.session_state[f"{block}_response"] = image_html + formatted_response
-                            else:
-                                st.session_state[f"{block}_response"] = formatted_response
-
+                                full_response += chunk
+                                # Show a loading message or progress bar
+                                content_placeholder.text("Generating content...")
+                            
+                            # Format the complete content
+                            display_content = format_markdown_content(block, full_response)
+                            
+                            # Wrap the content in a block-content div
+                            wrapped_content = f'<div class="block-content">{display_content}</div>'
+                            
+                            # Display the formatted content
+                            content_placeholder.markdown(wrapped_content, unsafe_allow_html=True)
+                            
+                            # Store the complete response in session state
+                            st.session_state[f"{block}_response"] = wrapped_content
                         except Exception as e:
                             error_message = prompt_helper.get_user_friendly_error_message(e)
                             st.error(f"An error occurred while generating content: {error_message}")
@@ -386,12 +473,13 @@ with content_column:
                 else:
                     display_content = st.session_state[f'{block}_response']
 
-                st.markdown(f"""
-                <div class="block-content">
-                    <h2>{prompt_helper.get_block_prompt_elem(block, 'title')}</h2>
-                    {display_content}
-                </div>
-                """, unsafe_allow_html=True)
+                # st.markdown(f"""
+                # <div class="block-content">
+                #     <h2>{prompt_helper.get_block_prompt_elem(block, 'title')}</h2>
+                #     {display_content}
+                # </div>
+                # """, unsafe_allow_html=True)
+                st.markdown(st.session_state[f'{block}_response'], unsafe_allow_html=True)
 
         if block not in story_blocks:
             if st.button(f"Remove {block}"):
