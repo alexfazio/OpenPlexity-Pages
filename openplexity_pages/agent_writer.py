@@ -8,7 +8,6 @@ from textwrap import dedent
 from langchain_groq import ChatGroq
 from crewai_tools import SerperDevTool
 from dotenv import load_dotenv
-import groq_search
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

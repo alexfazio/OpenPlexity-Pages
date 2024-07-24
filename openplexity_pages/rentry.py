@@ -6,6 +6,7 @@ import os
 import ssl
 from dotenv import load_dotenv
 import certifi
+import re
 
 load_dotenv()
 
@@ -56,11 +57,15 @@ def new_rentry(url, edit_code, text):
     return json.loads(client.post(f"{base_url}/api/new", payload, headers=headers).data)
 
 
+def strip_html_tags(text):
+    return re.sub('<[^<]+?>', '', text)
+
 # Export content to Rentry and return the URL and edit code
 def export_to_rentry(content):
+    cleaned_content = strip_html_tags(content)
     url = ''  # Leave empty for random URL
     edit_code = ''  # Leave empty for random edit code
-    response = new_rentry(url, edit_code, content)
+    response = new_rentry(url, edit_code, cleaned_content)
     if response['status'] == '200':
         return response['url'], response['edit_code']
     else:

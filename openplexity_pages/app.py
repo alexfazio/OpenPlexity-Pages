@@ -6,19 +6,25 @@ import webbrowser
 from toggle_states import toggle_states_structure
 from serper_api import search_images as serper_search_images
 from streamlit_image_select import image_select
+import re
+import html
+import markdown
 
 # Define story blocks
-story_blocks = ["Block 1", "Block 2", "Block 3"]
+story_blocks = ["Introduction", "Main", "Conclusion"]
 
 # Initialize the story blocks in session state
 if 'story_blocks' not in st.session_state:
-    st.session_state.story_blocks = ["Block 1", "Block 2", "Block 3"]
+    st.session_state.story_blocks = ["Introduction", "Main", "Conclusion"]
 
 st.set_page_config(page_title="Openplexity Pages", layout="wide")
 
 # Custom CSS
 st.markdown("""
     <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+
     .block-content {
         background-color: white;
         border-radius: 10px;
@@ -30,10 +36,52 @@ st.markdown("""
         color: #1E1E1E;
         border-bottom: 2px solid #4CAF50;
         padding-bottom: 10px;
+        font-size: 28px;
+        font-family: "Montserrat";
+    }
+    .block-content h3 {
+        color: #333;
+        margin-top: 20px;
+        font-size: 24px;
+        font-family: "Montserrat"
     }
     .block-content p {
         color: #333;
         line-height: 1.6;
+        font-size: 20px;
+        font-family: "Lato";
+    }
+    .block-image {
+        max-width: 100%;
+        height: auto;
+        margin: 20px 0;
+    }
+    figure {
+        margin: 0;
+        text-align: center;
+    }
+    figcaption {
+        font-style: italic;
+        color: #666;
+    }
+    blockquote {
+        background-color: #f9f9f9;
+        border-left: 5px solid #ccc;
+        margin: 1.5em 10px;
+        padding: 0.5em 10px;
+        color: #666;
+        quotes: "\\201C""\\201D""\\2018""\\2019";
+    }
+    blockquote:before {
+        color: #ccc;
+        content: open-quote;
+        font-size: 4em;
+        line-height: 0.1em;
+        margin-right: 0.25em;
+        vertical-align: -0.4em;
+    }
+    sup {
+        color: #0066cc;
     }
     .centered-image {
         display: block;
@@ -47,8 +95,12 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Place the image at the top of the page
-st.markdown('<img src="https://i.imgur.com/foi8itb.png" alt="Openplexity Pages" class="centered-image">',
-            unsafe_allow_html=True)
+# st.markdown('<img src="https://i.imgur.com/foi8itb.png" alt="Openplexity Pages" class="centered-image">',
+#             unsafe_allow_html=True)
+
+st.markdown('<img src="https://i.imgur.com/WaD65y8.png" alt="Openplexity Pages" class="centered-image">',
+           unsafe_allow_html=True)
+
 
 # Create three columns: Settings, Content, and Outline/Preview
 settings_column, content_column, outline_column = st.columns([1, 2, 1])
@@ -58,18 +110,41 @@ if 'toggles_initialized' not in st.session_state:
     toggles_helper.reset_all_toggles()
     st.session_state.toggles_initialized = True
 
+
+def format_markdown_content(block, content):
+    # Convert Markdown to HTML
+    html_content = markdown.markdown(content)
+
+    # Handle custom tags
+    html_content = re.sub(r'<aggregate_citations>(.*?)</aggregate_citations>',
+                          r'<div class="citations">\1</div>',
+                          html_content,
+                          flags=re.DOTALL)
+
+    return html_content
+
+
 def add_new_block():
     new_block_name = f"Custom Block {len(st.session_state.story_blocks) - 2}"
     st.session_state.story_blocks.append(new_block_name)
+    # Initialize prompt elements for the new block
+    prompt_helper.update_block_prompt_elem(new_block_name, "title", new_block_name)
+    prompt_helper.update_block_prompt_elem(new_block_name, "word_count", 60)
+    prompt_helper.update_block_prompt_elem(new_block_name, "keywords", "")
+    prompt_helper.update_block_prompt_elem(new_block_name, "notes", "")
+
 
 def remove_block(block_name):
     if block_name in st.session_state.story_blocks and len(st.session_state.story_blocks) > 3:
         st.session_state.story_blocks.remove(block_name)
-        # Clean up any associated state
-        if f"{block_name}_response" in st.session_state:
-            del st.session_state[f"{block_name}_response"]
-        if f"{block_name}_image_url" in st.session_state:
-            del st.session_state[f"{block_name}_image_url"]
+        # Clean up all associated state
+        for key in list(st.session_state.keys()):
+            if key.startswith(f"{block_name}_"):
+                del st.session_state[key]
+        # Remove block from prompt_helper
+        prompt_helper.remove_block_prompt_elem(block_name)
+    print(f"after deletion {block_name}", prompt_helper.get_block_prompt_elem(block_name, None))
+
 
 def toggle_callback(toggle):
     st.session_state[toggle] = not st.session_state.get(toggle, False)
@@ -340,28 +415,24 @@ with content_column:
                             # Create a placeholder for the streamed content
                             content_placeholder = output_placeholder.empty()
 
-                            formatted_response = ""
+                            # Accumulate the entire response
+                            full_response = ""
                             for chunk in content_generator:
-                                formatted_response += chunk
+                                full_response += chunk
+                                # Show a loading message or progress bar
+                                content_placeholder.text("Generating content...")
 
-                                # Add the image at the top of the content if it exists
-                                if f"{block}_image_url" in st.session_state:
-                                    image_html = img_to_html(st.session_state[f"{block}_image_url"])
-                                    display_content = image_html + formatted_response
-                                else:
-                                    display_content = formatted_response
+                            # Format the complete content
+                            display_content = format_markdown_content(block, full_response)
 
-                                content_placeholder.markdown(f"""
-                                    {display_content}
-                                """, unsafe_allow_html=False)
+                            # Wrap the content in a block-content div
+                            wrapped_content = f'<div class="block-content">{display_content}</div>'
 
-                            # Store the complete response including the image in session state
-                            if f"{block}_image_url" in st.session_state:
-                                image_html = img_to_html(st.session_state[f"{block}_image_url"])
-                                st.session_state[f"{block}_response"] = image_html + formatted_response
-                            else:
-                                st.session_state[f"{block}_response"] = formatted_response
+                            # Display the formatted content
+                            content_placeholder.markdown(wrapped_content, unsafe_allow_html=True)
 
+                            # Store the complete response in session state
+                            st.session_state[f"{block}_response"] = wrapped_content
                         except Exception as e:
                             error_message = prompt_helper.get_user_friendly_error_message(e)
                             st.error(f"An error occurred while generating content: {error_message}")
@@ -379,17 +450,18 @@ with content_column:
                 else:
                     display_content = st.session_state[f'{block}_response']
 
-                st.markdown(f"""
-                <div class="block-content">
-                    <h2>{prompt_helper.get_block_prompt_elem(block, 'title')}</h2>
-                    {display_content}
-                </div>
-                """, unsafe_allow_html=True)
+                # st.markdown(f"""
+                # <div class="block-content">
+                #     <h2>{prompt_helper.get_block_prompt_elem(block, 'title')}</h2>
+                #     {display_content}
+                # </div>
+                # """, unsafe_allow_html=True)
+                st.markdown(st.session_state[f'{block}_response'], unsafe_allow_html=True)
 
         if block not in story_blocks:
             if st.button(f"Remove {block}"):
                 remove_block(block)
-                st.experimental_rerun()
+                st.rerun()
 
         with settings_tab:
             # User input for word count
@@ -435,12 +507,11 @@ with content_column:
             if f"{block}_image_url" in st.session_state:
                 st.image(st.session_state[f"{block}_image_url"], caption=f"Image for {block}", use_column_width=True)
 
-        
     # Close the content-column div
     st.markdown('</div>', unsafe_allow_html=True)
     if st.button("Add New Block"):
-            add_new_block()
-            st.experimental_rerun()
+        add_new_block()
+        st.rerun()
 
 # New outline_column
 with outline_column:

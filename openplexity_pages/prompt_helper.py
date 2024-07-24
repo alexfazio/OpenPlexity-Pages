@@ -1,4 +1,3 @@
-from experiments import vertex_api
 from prompt_states import prompt_states
 from agent_writer import main as agent_writer
 import groq_search
@@ -55,6 +54,11 @@ def get_global_prompt_elem(key, default=None):
     return prompt_states.get("global_prompt_elem", {}).get(key, default)
 
 
+def remove_block_prompt_elem(block):
+    if "block_level_prompt_elem" in prompt_states and block in prompt_states["block_level_prompt_elem"]:
+        del prompt_states["block_level_prompt_elem"][block]
+
+
 def get_block_prompt_elem(block, key, default=None):
     if default is None:
         default = DEFAULT_BLOCK_LEVEL_PROMPT_ELEM.get(block, {}).get(key, "")
@@ -95,7 +99,7 @@ def get_formatted_prompt(block):
 
     prompt += f"""
     2. Take note of the story title and section title:
-    
+
     <story_title>{story_title}</story_title>
     <section_title>{block_elements.get('title', block)}</section_title>
     """
@@ -134,14 +138,13 @@ def get_formatted_prompt(block):
     if block_elements.get("notes"):
         prompt += f"\n 11. Consider these additional_notes and include relevant information if it fits within the context of the '{block_elements.get('title', block)}' section."
 
-
     prompt += f"""
     \nPresent your article section using the following format:
-    
+
     <article_section>
     Write your {word_count} sentences here, including <inline_citations> tags for the numbered citations within the text.
     </article_section>
-    
+
     <aggregate_citations>
     List your sources here, numbered to match the inline citations.
     </aggregate_citations>
@@ -157,6 +160,7 @@ def generate_api_response(block):
     prompt = get_formatted_prompt(block)
     full_response = agent_writer(prompt)
     return full_response
+
 
 def get_user_friendly_error_message(error):
     if isinstance(error, ValueError) and "blocked by the safety filters" in str(error):
