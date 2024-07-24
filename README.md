@@ -51,6 +51,10 @@ OpenPlexity Pages empowers creators in any field to share knowledge:
 - **Hobbyists**: Share your passions by creating engaging guides that inspire others.
 - **Content Creators**: Produce well-researched, visually appealing articles on any topic.
 
+# Requirements
+- `Groq API Key`,
+- `Seperapi API Key`.
+
 # Getting Started
 
 Follow these instructions to set up and run OpenPlexity Pages using Poetry.
