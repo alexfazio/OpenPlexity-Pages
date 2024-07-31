@@ -50,8 +50,6 @@ OpenPlexity Pages empowers creators in any field to share knowledge:
 - `Groq API Key`,
 - `Seperapi API Key`.
 
-# Architecture
-
 # Getting Started
 
 Follow these instructions to set up and run OpenPlexity Pages using Poetry.
