@@ -122,4 +122,4 @@ With OpenPlexity Pages, you have the freedom to host your own instance, contribu
 - [x] Settings for LLMs
 
 ## Acknowledgement
-We are very grateful to [MutatedMinds](https://mutatedminds.) for leading the UI development.
+We are very grateful to [MutatedMind](https://mutatedmind.com) for leading the UI development.
