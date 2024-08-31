@@ -123,3 +123,9 @@ With OpenPlexity Pages, you have the freedom to host your own instance, contribu
 
 ## Acknowledgement
 We are very grateful to [MutatedMind](https://mutatedmind.com) for leading the UI development.
+
+## License
+
+[MIT](https://opensource.org/licenses/MIT)
+
+Copyright (c) 2024-present, Alex Fazio
