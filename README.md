@@ -115,11 +115,17 @@ With OpenPlexity Pages, you have the freedom to host your own instance, contribu
 **Let's see what we can create together.**
 
 ## Roadmap
-- [x] Make better
-- [x] Fix image feature
-- [x] Add more document export modalities
-- [x] Local LLM support
-- [x] Settings for LLMs
+- [ ] Make better
+- [ ] Fix image feature
+- [ ] Add more document export modalities
+- [ ] Local LLM support
+- [ ] Settings for LLMs
 
 ## Acknowledgement
 We are very grateful to [MutatedMind](https://mutatedmind.com) for leading the UI development.
+
+## License
+
+[MIT](https://opensource.org/licenses/MIT)
+
+Copyright (c) 2024-present, Alex Fazio
