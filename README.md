@@ -20,8 +20,11 @@
 
 ## Introducing OpenPlexity Pages
 
-OpenPlexity Pages serves as an open-source alternative to Perplexity Pages, with the aim of transforming your research into visually appealing, comprehensive content.
+OpenPlexity Pages serves as an open-source alternative to [Perplexity Pages](https://www.perplexity.ai/hub/blog/perplexity-pages), with the aim of transforming your research into visually appealing, comprehensive content.
 Although the system is not capable of producing publication-ready articles, which often necessitate a substantial number of revisions, experienced editors may find it beneficial during their initial writing phase.
+
+> [!note]
+> This project was 99% vibe coded as a fun Saturday hack. I'm not going to support it in any way, it's provided here as is for other people's inspiration and I don't intend to improve it. Code is ephemeral now and libraries are over, ask your LLM to change it in whatever way you like.
 
 ## What sets OpenPlexity apart?
 
